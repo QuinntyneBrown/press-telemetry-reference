@@ -62,11 +62,3 @@ public sealed partial class TelemetryQueryValidator
         return false;
     }
 }
-
-public sealed class RangeValidation
-{
-    public Dictionary<string, string[]> Errors { get; } = [];
-    public DateTimeOffset From { get; set; }
-    public DateTimeOffset To { get; set; }
-    public bool IsValid => Errors.Count == 0;
-}

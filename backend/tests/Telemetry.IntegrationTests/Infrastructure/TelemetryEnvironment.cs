@@ -168,9 +168,3 @@ public sealed class TelemetryEnvironment : IAsyncLifetime
     public Task PauseRedisAsync() => _redis.PauseAsync();
     public Task UnpauseRedisAsync() => _redis.UnpauseAsync();
 }
-
-[CollectionDefinition(Name)]
-public sealed class TelemetryCollection : ICollectionFixture<TelemetryEnvironment>
-{
-    public const string Name = "telemetry environment";
-}

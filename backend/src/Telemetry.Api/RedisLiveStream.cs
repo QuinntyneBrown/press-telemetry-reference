@@ -5,12 +5,6 @@ using StackExchange.Redis;
 namespace Telemetry.Api;
 
 /// <summary>
-/// Broadcast hub at /hubs/telemetry. Clients receive every ingested point as a "telemetry"
-/// message; there are no subscription operations or server-side series groups (L2-007).
-/// </summary>
-public sealed class TelemetryHub : Hub;
-
-/// <summary>
 /// Routes each worker-published point from the shared "telemetry" Redis channel to every
 /// client connected to this API instance. The live path never reads Couchbase; a Redis outage
 /// pauses delivery until the subscription reconnects (L2-008).

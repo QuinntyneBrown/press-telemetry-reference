@@ -135,9 +135,4 @@ public sealed class LiveStreamTests(TelemetryEnvironment environment) : IAsyncLi
         await connection.StartAsync();
         return new LiveClient(connection);
     }
-
-    private sealed record LiveClient(HubConnection Connection) : IAsyncDisposable
-    {
-        public ValueTask DisposeAsync() => Connection.DisposeAsync();
-    }
 }

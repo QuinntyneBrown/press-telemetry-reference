@@ -56,8 +56,4 @@ public sealed class CouchbaseTelemetryReader(CouchbaseConnection connection, IOp
                 DateTimeOffset.FromUnixTimeMilliseconds((long)row.latest[0])))
             .ToListAsync(cancellationToken);
     }
-
-    private sealed record RangeRow(long t, double v);
-
-    private sealed record LatestRow(string deviceId, string metric, double[] latest);
 }
