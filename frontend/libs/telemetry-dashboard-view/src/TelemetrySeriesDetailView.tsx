@@ -25,7 +25,8 @@ export function TelemetrySeriesDetailView() {
   const snapshot = useTelemetrySnapshot();
   const [preset, setPreset] = useState<Preset>('24H');
   const [range, setRange] = useState<TimeRange>(() => presetRange(24));
-  const query = useTelemetryRange({ deviceId, metric }, range);
+  // Presets track "now" and keep receiving live appends; a custom window is fixed.
+  const query = useTelemetryRange({ deviceId, metric }, range, { live: preset !== 'Custom' });
   const points = query.data ?? [];
   const current = snapshot.data?.find(p => p.deviceId === deviceId && p.metric === metric);
   const hasData = points.length > 0;

@@ -50,7 +50,7 @@ function OverviewChartCard({
     const now = Date.now();
     return { from: new Date(now - 5 * 60_000), to: new Date(now) };
   });
-  const query = useTelemetryRange({ deviceId, metric }, range);
+  const query = useTelemetryRange({ deviceId, metric }, range, { live: true });
 
   return (
     <div className="card" data-testid="chart-card">

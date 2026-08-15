@@ -25,9 +25,12 @@ export function patchTelemetryCaches(queryClient: QueryClient, points: Telemetry
     return [...bySeries.values()];
   });
 
-  for (const [queryKey, data] of queryClient.getQueriesData<SeriesPoint[]>({
-    queryKey: ['telemetry', 'range'],
-  })) {
+  // Only live-tracking windows (meta.liveAppend, set by useTelemetryRange) receive
+  // appends; an explicitly chosen historical window is a fixed frame (L2-005 AC2).
+  for (const query of queryClient.getQueryCache().findAll({ queryKey: ['telemetry', 'range'] })) {
+    if (query.meta?.liveAppend !== true) continue;
+    const { queryKey } = query;
+    const data = query.state.data as SeriesPoint[] | undefined;
     if (!data) continue;
     const [, , deviceId, metric] = queryKey as readonly string[];
     let newest = data.length ? Date.parse(data[data.length - 1].timestamp) : -Infinity;
