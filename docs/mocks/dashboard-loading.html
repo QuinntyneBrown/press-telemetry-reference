@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard Loading — Press Telemetry Mock</title>
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/mocks.css">
+<style>
+  /* Chart-sized skeleton: matches .chart's aspect ratio so the card does not resize on load. */
+  .sk-bar--chart { height: auto; aspect-ratio: 3 / 1; }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="brand">Press Telemetry</div>
+  <div class="conn conn--warn" role="status"><span class="conn__dot"></span>Connecting</div>
+</header>
+
+<div class="toolbar">
+  <h1 class="toolbar__title">Overview</h1>
+  <div class="toolbar__spacer"></div>
+</div>
+
+<main class="main">
+  <div class="grid" aria-busy="true">
+
+    <div class="tile">
+      <div class="sk-bar sk-bar--label"></div>
+      <div class="sk-bar sk-bar--value"></div>
+      <div class="sk-bar sk-bar--ts"></div>
+    </div>
+
+    <div class="tile">
+      <div class="sk-bar sk-bar--label"></div>
+      <div class="sk-bar sk-bar--value"></div>
+      <div class="sk-bar sk-bar--ts"></div>
+    </div>
+
+    <div class="tile">
+      <div class="sk-bar sk-bar--label"></div>
+      <div class="sk-bar sk-bar--value"></div>
+      <div class="sk-bar sk-bar--ts"></div>
+    </div>
+
+    <div class="tile">
+      <div class="sk-bar sk-bar--label"></div>
+      <div class="sk-bar sk-bar--value"></div>
+      <div class="sk-bar sk-bar--ts"></div>
+    </div>
+
+    <div class="tile">
+      <div class="sk-bar sk-bar--label"></div>
+      <div class="sk-bar sk-bar--value"></div>
+      <div class="sk-bar sk-bar--ts"></div>
+    </div>
+
+    <div class="tile">
+      <div class="sk-bar sk-bar--label"></div>
+      <div class="sk-bar sk-bar--value"></div>
+      <div class="sk-bar sk-bar--ts"></div>
+    </div>
+
+    <div class="tile">
+      <div class="sk-bar sk-bar--label"></div>
+      <div class="sk-bar sk-bar--value"></div>
+      <div class="sk-bar sk-bar--ts"></div>
+    </div>
+
+    <div class="tile">
+      <div class="sk-bar sk-bar--label"></div>
+      <div class="sk-bar sk-bar--value"></div>
+      <div class="sk-bar sk-bar--ts"></div>
+    </div>
+
+    <div class="card">
+      <div class="card__head">
+        <div class="sk-bar sk-bar--label"></div>
+      </div>
+      <div class="sk-bar sk-bar--chart"></div>
+    </div>
+
+    <div class="card">
+      <div class="card__head">
+        <div class="sk-bar sk-bar--label"></div>
+      </div>
+      <div class="sk-bar sk-bar--chart"></div>
+    </div>
+
+  </div>
+</main>
+
+<footer class="mock-note">Mock: dashboard loading state — snapshot query in flight. Traces to L2-009 AC2.</footer>
+
+</body>
+</html>

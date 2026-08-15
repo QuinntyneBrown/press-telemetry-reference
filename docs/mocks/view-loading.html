@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>View loading — Press Telemetry Mock</title>
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/mocks.css">
+<style>
+  /* File-specific: centre the ViewLoader fallback in the viewport. Tokens only. */
+  .view-loading {
+    min-height: 50vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    text-align: center;
+  }
+  .view-loading p { margin: 0; }
+  .view-loading .spinner { margin: 0; }
+  .view-loading__text { font-size: 15px; }
+  .view-loading__chunk {
+    font-family: var(--font-data);
+    font-size: var(--text-xs);
+    color: var(--color-text-muted);
+  }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="brand">Press Telemetry</div>
+  <div class="conn conn--ok" role="status"><span class="conn__dot"></span>Connected</div>
+</header>
+
+<main class="main">
+  <div class="view-loading">
+    <div class="spinner" role="status" aria-label="Loading view"></div>
+    <p class="view-loading__text">Loading view…</p>
+    <p class="view-loading__chunk">telemetry-dashboard-view</p>
+  </div>
+</main>
+
+<footer class="mock-note">Mock: view loading fallback — <code>ViewLoader</code> Suspense boundary while the view library chunk downloads. Traces to L2-014 AC3.</footer>
+
+</body>
+</html>

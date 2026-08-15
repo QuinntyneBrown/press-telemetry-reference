@@ -1,0 +1,123 @@
+/* dashboard-core component styles. Token references only; no color literals (L2-015 AC2). */
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--color-surface-base);
+  color: var(--color-text-primary);
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+#root { flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+a { color: var(--color-accent-live); text-decoration: none; }
+a:hover { text-decoration: underline; }
+:focus-visible { outline: 2px solid var(--color-accent-live); outline-offset: 2px; }
+
+.label {
+  font-size: var(--text-xs);
+  letter-spacing: var(--track);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+/* ConnectionStatusIndicator */
+.conn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+  letter-spacing: var(--track);
+  text-transform: uppercase;
+}
+.conn__dot { width: 8px; height: 8px; border-radius: 50%; }
+.conn--ok   { color: var(--color-status-ok); }
+.conn--ok   .conn__dot { background: var(--color-status-ok); }
+.conn--warn { color: var(--color-status-warn); }
+.conn--warn .conn__dot { background: var(--color-status-warn); animation: blink 1.2s ease-in-out infinite; }
+.conn--err  { color: var(--color-status-error); }
+.conn--err  .conn__dot { background: var(--color-status-error); }
+@keyframes blink { 50% { opacity: 0.25; } }
+
+/* DashboardGrid */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(var(--tile-min), 100%), 1fr));
+  gap: var(--space-3);
+}
+
+/* LatestValueTile */
+.tile, .card {
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-1);
+  padding: var(--space-3);
+  min-width: 0;
+}
+.tile__head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-2); }
+.tile__device { font-family: var(--font-data); font-size: var(--text-xs); color: var(--color-text-muted); }
+.tile__value {
+  font-family: var(--font-data);
+  font-size: var(--text-value);
+  font-variant-numeric: tabular-nums;
+  margin: var(--space-2) 0 var(--space-1);
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+.tile__unit { font-size: var(--text-sm); color: var(--color-text-secondary); }
+.tile__ts { font-family: var(--font-data); font-size: var(--text-xs); color: var(--color-text-muted); }
+.pulse {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--color-accent-live);
+  align-self: center;
+  animation: pulse 1s ease-out infinite;
+}
+@keyframes pulse { 0% { opacity: 1; } 70% { opacity: 0.2; } 100% { opacity: 1; } }
+
+/* TimeSeriesChart card */
+.card__head { display: flex; align-items: baseline; gap: var(--space-2); flex-wrap: wrap; margin-bottom: var(--space-2); }
+.card__spacer { flex: 1; }
+/* Chart anatomy: SVG plot (viewBox 0 0 100 100, preserveAspectRatio="none",
+   non-scaling strokes) + HTML axis labels, so text never scales with the plot. */
+.chartbox { display: grid; grid-template-columns: auto 1fr; column-gap: var(--space-2); row-gap: var(--space-1); min-width: 0; }
+.chart { grid-column: 2; grid-row: 1; display: block; width: 100%; min-width: 0; aspect-ratio: 3 / 1; overflow: visible; }
+.ylabels {
+  grid-column: 1; grid-row: 1;
+  display: flex; flex-direction: column; justify-content: space-between; align-items: flex-end;
+  font-family: var(--font-data); font-size: var(--text-xs); color: var(--color-text-muted); line-height: 1;
+}
+.xlabels {
+  grid-column: 2; grid-row: 2;
+  display: flex; justify-content: space-between;
+  font-family: var(--font-data); font-size: var(--text-xs); color: var(--color-text-muted);
+  min-width: 0;
+}
+.chart .gridline { stroke: var(--color-grid-line); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.chart .series { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+.live-tag {
+  font: 600 var(--text-xs) var(--font-ui);
+  letter-spacing: var(--track);
+  color: var(--color-accent-live);
+  border: 1px solid var(--color-accent-live);
+  border-radius: var(--radius-1);
+  padding: 0 var(--space-1);
+}
+
+/* Plot overlays (empty range) */
+.plot { position: relative; }
+.plot__empty {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: var(--space-1);
+  pointer-events: none;
+  padding-bottom: calc(var(--text-xs) + var(--space-1));
+}
+.plot__empty-title { font-size: 15px; color: var(--color-text-secondary); }
+.plot__empty-range { font-family: var(--font-data); font-size: var(--text-xs); color: var(--color-text-muted); }
+
+@media (prefers-reduced-motion: reduce) {
+  .pulse, .conn--warn .conn__dot { animation: none; }
+}

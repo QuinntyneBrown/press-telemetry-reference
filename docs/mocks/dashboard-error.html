@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard Error — Press Telemetry Mock</title>
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/mocks.css">
+</head>
+<body>
+
+<header class="app-header">
+  <div class="brand">Press Telemetry</div>
+  <div class="conn conn--ok" role="status"><span class="conn__dot"></span>Connected</div>
+</header>
+
+<div class="toolbar">
+  <h1 class="toolbar__title">Overview</h1>
+  <div class="toolbar__spacer"></div>
+</div>
+
+<main class="main">
+  <div class="grid">
+
+    <div class="panel panel--error">
+      <svg class="panel__icon" width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+        <path d="M12 3.5 22 20.5H2L12 3.5Z" style="stroke: var(--color-status-error)" stroke-width="1.5" stroke-linejoin="round"></path>
+        <path d="M12 9.75v4.5" style="stroke: var(--color-status-error)" stroke-width="1.5" stroke-linecap="round"></path>
+        <circle cx="12" cy="17.5" r="1" style="fill: var(--color-status-error)"></circle>
+      </svg>
+      <h2 class="panel__title">Couldn't load telemetry</h2>
+      <p class="panel__detail"><code>GET /api/telemetry/latest</code> failed. The dashboard will show current values once it loads.</p>
+      <button class="btn btn--primary" type="button">Retry</button>
+    </div>
+
+  </div>
+</main>
+
+<footer class="mock-note">Mock: dashboard error state — snapshot query failed; layout intact with a retry action. Traces to L2-009 AC2.</footer>
+
+</body>
+</html>

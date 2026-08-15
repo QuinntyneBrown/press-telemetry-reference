@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Components — Press Telemetry Mock</title>
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/mocks.css">
+<style>
+  /* File-specific sheet helpers. Token references only; no color literals (L2-015 AC2). */
+
+  /* The token table scrolls inside itself rather than widening the page. */
+  .table-scroll { overflow-x: auto; }
+  .table-scroll .swatch-table { min-width: 34rem; }
+
+  /* One specimen: variant name, the component, an optional caption. */
+  .demo {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    flex: 1 1 20rem;
+    max-width: 26rem;
+    min-width: 0;
+  }
+  .demo--tile { flex-basis: 16rem; max-width: 22rem; }
+  .cap {
+    font-size: var(--text-xs);
+    color: var(--color-text-muted);
+    margin: var(--space-1) 0 0;
+  }
+  .cap code { font-family: var(--font-data); }
+
+  /* Static hover layer over the copied plot: shares grid area 2/1 with .chart. */
+  .hover { grid-column: 2; grid-row: 1; position: relative; }
+  .hover__cross {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 89.8%;
+    width: 1px;
+    background: var(--color-border-strong);
+  }
+  .hover__tip {
+    position: absolute;
+    top: var(--space-1);
+    left: 89.8%;
+    transform: translateX(-100%);
+    margin-left: calc(-1 * var(--space-2));
+    padding: var(--space-1) var(--space-2);
+    background: var(--color-surface-raised);
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-1);
+    font-family: var(--font-data);
+    font-size: var(--text-xs);
+    color: var(--color-text-primary);
+    white-space: nowrap;
+  }
+
+  /* Chart placeholders: keep the plot's 3:1 box while data is absent. */
+  .sk-chart { height: auto; width: 100%; aspect-ratio: 3 / 1; }
+  .chart-msg {
+    aspect-ratio: 3 / 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-3);
+    text-align: center;
+  }
+  .chart-msg--error { color: var(--color-status-error); }
+  .plot { position: relative; }
+  .plot__msg {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-muted);
+  }
+
+  /* Dialog rendered inline instead of inside .scrim. */
+  .dialog--static { max-width: 26rem; }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="brand">Press Telemetry</div>
+  <div class="conn conn--ok" role="status"><span class="conn__dot"></span>Connected</div>
+</header>
+
+<div class="toolbar">
+  <h1 class="toolbar__title">Components — dashboard-core</h1>
+</div>
+
+<main class="main">
+
+  <!-- a) Design tokens -->
+  <section class="sheet-section">
+    <h2 class="sheet-h">Design tokens</h2>
+    <div class="table-scroll">
+      <table class="swatch-table">
+        <thead>
+          <tr>
+            <th scope="col">Token</th>
+            <th scope="col">Value</th>
+            <th scope="col">Swatch</th>
+            <th scope="col">Role</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>--color-surface-base</td>
+            <td>hsl(220 8% 8%)</td>
+            <td><span class="swatch-chip" style="background: var(--color-surface-base)"></span></td>
+            <td>page — hue 220, saturation 8% — luminance ≤ 0.1 (L2-015 AC1)</td>
+          </tr>
+          <tr>
+            <td>--color-surface-raised</td>
+            <td>hsl(220 8% 12%)</td>
+            <td><span class="swatch-chip" style="background: var(--color-surface-raised)"></span></td>
+            <td>tiles, cards, header — hue 220, saturation 8% — luminance ≤ 0.1 (L2-015 AC1)</td>
+          </tr>
+          <tr>
+            <td>--color-surface-overlay</td>
+            <td>hsl(220 8% 16%)</td>
+            <td><span class="swatch-chip" style="background: var(--color-surface-overlay)"></span></td>
+            <td>dialogs, chips — hue 220, saturation 8% — luminance ≤ 0.1 (L2-015 AC1)</td>
+          </tr>
+          <tr>
+            <td>--color-scrim</td>
+            <td>hsl(220 8% 4% / 0.6)</td>
+            <td><span class="swatch-chip" style="background: var(--color-scrim)"></span></td>
+            <td>dialog backdrop — hue 220, saturation 8% — luminance ≤ 0.1 (L2-015 AC1)</td>
+          </tr>
+          <tr>
+            <td>--color-skeleton</td>
+            <td>hsl(220 8% 14%)</td>
+            <td><span class="swatch-chip" style="background: var(--color-skeleton)"></span></td>
+            <td>shimmer base — loading placeholders</td>
+          </tr>
+          <tr>
+            <td>--color-skeleton-hi</td>
+            <td>hsl(220 8% 18%)</td>
+            <td><span class="swatch-chip" style="background: var(--color-skeleton-hi)"></span></td>
+            <td>shimmer highlight — loading placeholders</td>
+          </tr>
+          <tr>
+            <td>--color-border-subtle</td>
+            <td>hsl(220 8% 20%)</td>
+            <td><span class="swatch-chip" style="background: var(--color-border-subtle)"></span></td>
+            <td>tile, card, and header hairlines</td>
+          </tr>
+          <tr>
+            <td>--color-border-strong</td>
+            <td>hsl(220 8% 30%)</td>
+            <td><span class="swatch-chip" style="background: var(--color-border-strong)"></span></td>
+            <td>button, input, and chip borders</td>
+          </tr>
+          <tr>
+            <td>--color-grid-line</td>
+            <td>hsl(220 8% 20%)</td>
+            <td><span class="swatch-chip" style="background: var(--color-grid-line)"></span></td>
+            <td>recessive chart gridlines</td>
+          </tr>
+          <tr>
+            <td>--color-text-primary</td>
+            <td>hsl(220 12% 88%)</td>
+            <td><span class="swatch-chip" style="background: var(--color-text-primary)"></span></td>
+            <td>values and body text — ~10:1 on overlay</td>
+          </tr>
+          <tr>
+            <td>--color-text-secondary</td>
+            <td>hsl(220 8% 68%)</td>
+            <td><span class="swatch-chip" style="background: var(--color-text-secondary)"></span></td>
+            <td>units and supporting text — ~5.3:1 on overlay</td>
+          </tr>
+          <tr>
+            <td>--color-text-muted</td>
+            <td>hsl(220 6% 58%)</td>
+            <td><span class="swatch-chip" style="background: var(--color-text-muted)"></span></td>
+            <td>labels, axes, timestamps — ~4.8:1 on overlay (AA)</td>
+          </tr>
+          <tr>
+            <td>--color-accent-live</td>
+            <td>hsl(190 65% 60%)</td>
+            <td><span class="swatch-chip" style="background: var(--color-accent-live)"></span></td>
+            <td>live emphasis — ~8:1 on raised, distinct from text tokens (L2-015 AC3)</td>
+          </tr>
+          <tr>
+            <td>--color-status-ok</td>
+            <td>hsl(145 50% 55%)</td>
+            <td><span class="swatch-chip" style="background: var(--color-status-ok)"></span></td>
+            <td>connected — always paired with a text label, never color alone</td>
+          </tr>
+          <tr>
+            <td>--color-status-warn</td>
+            <td>hsl(42 75% 58%)</td>
+            <td><span class="swatch-chip" style="background: var(--color-status-warn)"></span></td>
+            <td>connecting / reconnecting — always paired with a text label, never color alone</td>
+          </tr>
+          <tr>
+            <td>--color-status-error</td>
+            <td>hsl(10 70% 62%)</td>
+            <td><span class="swatch-chip" style="background: var(--color-status-error)"></span></td>
+            <td>disconnected, errors, validation — always paired with a text label, never color alone</td>
+          </tr>
+          <tr>
+            <td>--color-data-1</td>
+            <td>#3987e5</td>
+            <td><span class="swatch-chip" style="background: var(--color-data-1)"></span></td>
+            <td rowspan="4">data series — fixed assignment order, CVD-validated set; series 1 = temperature, 2 = pressure</td>
+          </tr>
+          <tr>
+            <td>--color-data-2</td>
+            <td>#d95926</td>
+            <td><span class="swatch-chip" style="background: var(--color-data-2)"></span></td>
+          </tr>
+          <tr>
+            <td>--color-data-3</td>
+            <td>#199e70</td>
+            <td><span class="swatch-chip" style="background: var(--color-data-3)"></span></td>
+          </tr>
+          <tr>
+            <td>--color-data-4</td>
+            <td>#c98500</td>
+            <td><span class="swatch-chip" style="background: var(--color-data-4)"></span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- b) LatestValueTile -->
+  <section class="sheet-section">
+    <h2 class="sheet-h">LatestValueTile</h2>
+    <div class="sheet-row">
+
+      <div class="demo demo--tile">
+        <div class="label">default</div>
+        <div class="tile">
+          <div class="tile__head"><span class="label">temperature</span><span class="tile__device">press-02</span></div>
+          <div class="tile__value">79.1 <span class="tile__unit">degC</span></div>
+          <div class="tile__ts">2026-08-15T12:00:05Z</div>
+        </div>
+      </div>
+
+      <div class="demo demo--tile">
+        <div class="label">live</div>
+        <div class="tile">
+          <div class="tile__head"><span class="label">temperature</span><span class="tile__device">press-01</span></div>
+          <div class="tile__value">87.4 <span class="tile__unit">degC</span><span class="pulse" aria-hidden="true"></span></div>
+          <div class="tile__ts">2026-08-15T12:00:07Z</div>
+        </div>
+      </div>
+
+      <div class="demo demo--tile">
+        <div class="label">stale</div>
+        <div class="tile">
+          <div class="tile__head"><span class="label">vibration</span><span class="tile__device">press-01</span></div>
+          <div class="tile__value">2.8 <span class="tile__unit">mm/s</span></div>
+          <div class="tile__ts">2026-08-15T11:57:12Z</div>
+          <p class="cap">live paused</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- c) ConnectionStatusIndicator -->
+  <section class="sheet-section">
+    <h2 class="sheet-h">ConnectionStatusIndicator</h2>
+    <div class="sheet-row">
+      <div class="conn conn--ok" role="status"><span class="conn__dot"></span>Connected</div>
+      <div class="conn conn--warn" role="status"><span class="conn__dot"></span>Reconnecting</div>
+      <div class="conn conn--err" role="status"><span class="conn__dot"></span>Disconnected</div>
+    </div>
+    <p class="cap">The warn variant doubles as 'Connecting' during initial load.</p>
+  </section>
+
+  <!-- d) TimeSeriesChart -->
+  <section class="sheet-section">
+    <h2 class="sheet-h">TimeSeriesChart</h2>
+    <div class="sheet-row">
+
+      <div class="demo">
+        <div class="label">loaded + hover (static)</div>
+        <div class="card">
+          <div class="card__head">
+            <span class="label">press-01 · temperature</span>
+            <span class="card__spacer"></span>
+            <span class="toolbar__range">last 5 min</span>
+            <span class="live-tag">Live</span>
+          </div>
+          <div class="chartbox">
+            <div class="ylabels" aria-hidden="true"><span>88.0</span><span>87.4</span><span>86.8</span></div>
+            <svg class="chart" viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label="Temperature of press-01 over the last five minutes, holding near 87.4 degrees Celsius">
+              <line class="gridline" x1="0" y1="0" x2="100" y2="0"></line>
+              <line class="gridline" x1="0" y1="50" x2="100" y2="50"></line>
+              <line class="gridline" x1="0" y1="100" x2="100" y2="100"></line>
+              <polyline class="series" style="stroke: var(--color-data-1)" points="0,57 1.7,43.3 3.4,46.6 5.1,34.9 6.8,41.8 8.5,41 10.2,39 11.9,32.2 13.6,37 15.3,22 16.9,34.6 18.6,30.2 20.3,21.5 22,33.6 23.7,19.2 25.4,25.8 27.1,22.3 28.8,32.1 30.5,37.3 32.2,32.9 33.9,35.5 35.6,42.6 37.3,39.8 39,41.6 40.7,35 42.4,52.8 44.1,56.9 45.8,45.4 47.5,45.6 49.2,60.7 50.8,56.5 52.5,66.5 54.2,68.8 55.9,63.1 57.6,61.7 59.3,71.4 61,73.1 62.7,80.8 64.4,68.8 66.1,64.3 67.8,64.4 69.5,75.8 71.2,68.3 72.9,70.9 74.6,69.9 76.3,71.1 78,67 79.7,56.8 81.4,62.3 83.1,69 84.7,63.8 86.4,59.6 88.1,55.7 89.8,50.7 91.5,54.2 93.2,48.3 94.9,50.1 96.6,40.4 98.3,44.1 100,31.2"></polyline>
+            </svg>
+            <div class="hover" aria-hidden="true">
+              <span class="hover__cross"></span>
+              <span class="hover__tip">12:00:07Z · 87.4 degC</span>
+            </div>
+            <div class="xlabels" aria-hidden="true"><span>11:55</span><span>12:00</span></div>
+          </div>
+        </div>
+        <p class="cap">hover layer shown statically</p>
+      </div>
+
+      <div class="demo">
+        <div class="label">loading</div>
+        <div class="card">
+          <div class="card__head">
+            <span class="label">press-01 · temperature</span>
+            <span class="card__spacer"></span>
+            <span class="toolbar__range">last 5 min</span>
+          </div>
+          <div class="sk-bar sk-chart"></div>
+        </div>
+      </div>
+
+      <div class="demo">
+        <div class="label">error</div>
+        <div class="card">
+          <div class="card__head">
+            <span class="label">press-01 · temperature</span>
+            <span class="card__spacer"></span>
+            <span class="toolbar__range">last 5 min</span>
+          </div>
+          <div class="chart-msg chart-msg--error">
+            <span>Couldn't load range</span>
+            <button class="btn">Retry</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="demo">
+        <div class="label">empty</div>
+        <div class="card">
+          <div class="card__head">
+            <span class="label">press-01 · temperature</span>
+            <span class="card__spacer"></span>
+            <span class="toolbar__range">last 5 min</span>
+          </div>
+          <div class="plot">
+            <svg class="chart" viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label="Empty temperature chart: no data in the selected range">
+              <line class="gridline" x1="0" y1="0" x2="100" y2="0"></line>
+              <line class="gridline" x1="0" y1="50" x2="100" y2="50"></line>
+              <line class="gridline" x1="0" y1="100" x2="100" y2="100"></line>
+            </svg>
+            <div class="plot__msg">No data in this range</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- e) Buttons & chips -->
+  <section class="sheet-section">
+    <h2 class="sheet-h">Buttons &amp; chips</h2>
+    <div class="sheet-row">
+      <button class="btn">Cancel</button>
+      <button class="btn btn--primary">Apply</button>
+      <button class="btn" disabled>Retry</button>
+      <button class="chip">1H</button>
+      <button class="chip chip--active">24H</button>
+    </div>
+  </section>
+
+  <!-- f) Dialog -->
+  <section class="sheet-section">
+    <h2 class="sheet-h">Dialog</h2>
+    <div class="dialog dialog--static" role="group" aria-labelledby="range-title">
+      <h3 class="dialog__title" id="range-title">Select time range</h3>
+      <div class="field">
+        <label for="range-from">From</label>
+        <input id="range-from" type="text" value="2026-08-15T12:00" aria-invalid="true" aria-describedby="range-error">
+      </div>
+      <div class="field">
+        <label for="range-to">To</label>
+        <input id="range-to" type="text" value="2026-08-14T12:00" aria-invalid="true" aria-describedby="range-error">
+      </div>
+      <p class="dialog__hint">Maximum window: 24 hours. Times are UTC (ISO-8601).</p>
+      <p class="dialog__error" role="alert" id="range-error">'From' must be earlier than 'To'.</p>
+      <div class="dialog__actions">
+        <button class="btn">Cancel</button>
+        <button class="btn btn--primary" disabled>Apply</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- g) Skeleton -->
+  <section class="sheet-section">
+    <h2 class="sheet-h">Skeleton</h2>
+    <div class="sheet-row">
+      <div class="demo demo--tile">
+        <div class="tile" aria-hidden="true">
+          <div class="sk-bar sk-bar--label"></div>
+          <div class="sk-bar sk-bar--value"></div>
+          <div class="sk-bar sk-bar--ts"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- h) DashboardGrid -->
+  <section class="sheet-section">
+    <h2 class="sheet-h">DashboardGrid</h2>
+    <p class="cap">Fluid auto-fit grid: <code>repeat(auto-fit, minmax(min(22rem, 100%), 1fr))</code> — 1 column below 576px, ≥2 at 768px, ≥3 at 1200px (L2-016). See <code>responsive-preview.html</code>.</p>
+  </section>
+
+</main>
+
+<footer class="mock-note">Mock: dashboard-core component sheet — tokens, variants, and states. Traces to L2-005 AC4, L2-013, L2-015.</footer>
+
+</body>
+</html>

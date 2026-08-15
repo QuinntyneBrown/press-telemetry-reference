@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Telemetry.Api/Telemetry.Api.csproj" />
+    <Project Path="src/Telemetry.Ingestion.Worker/Telemetry.Ingestion.Worker.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Telemetry.IntegrationTests/Telemetry.IntegrationTests.csproj" />
+  </Folder>
+</Solution>

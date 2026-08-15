@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UI Mocks — Press Telemetry</title>
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/mocks.css">
+<style>
+  .catalog { max-width: 56rem; margin: 0 auto; padding: var(--space-4); }
+  .catalog-intro { color: var(--color-text-secondary); margin: 0 0 var(--space-5); }
+  .mock-list { list-style: none; margin: 0 0 var(--space-5); padding: 0; }
+  .mock-list li {
+    display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-2);
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid var(--color-border-subtle);
+  }
+  .mock-list a { font-weight: 600; }
+  .mock-list .desc { color: var(--color-text-muted); flex: 1 1 16rem; }
+  .l2chip {
+    font: 600 var(--text-xs) var(--font-data);
+    color: var(--color-text-muted);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius-1);
+    padding: 0 var(--space-1);
+    white-space: nowrap;
+  }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="brand">Press Telemetry</div>
+  <span class="label">UI mocks</span>
+</header>
+
+<main class="catalog">
+  <div class="toolbar" style="padding-left: 0; padding-right: 0;">
+    <h1 class="toolbar__title">UI mocks — reference dashboard</h1>
+  </div>
+  <p class="catalog-intro">
+    Static, self-contained HTML mocks of every screen, state, dialog, and component in the
+    reference solution — the visual contract for <code>dashboard-core</code>. Everything is
+    token-driven dark theme (L2-015), fluid-responsive (L2-016), and renders offline. Chips
+    name the L2 requirements each mock visualizes (see <code>docs/specs/L2.md</code>).
+  </p>
+
+  <section class="sheet-section">
+    <h2 class="sheet-h">Screens</h2>
+    <ul class="mock-list">
+      <li><a href="dashboard.html">dashboard</a><span class="desc">Overview — hydrated, connected, live tiles + charts at ~1&nbsp;Hz</span><span class="l2chip">L2-006</span><span class="l2chip">L2-009</span><span class="l2chip">L2-011</span><span class="l2chip">L2-013</span><span class="l2chip">L2-015</span><span class="l2chip">L2-016</span></li>
+      <li><a href="series-detail.html">series-detail</a><span class="desc">Historical range view — time conductor (max 24&nbsp;h), live edge</span><span class="l2chip">L2-005</span><span class="l2chip">L2-009</span><span class="l2chip">L2-010</span><span class="l2chip">L2-016</span></li>
+    </ul>
+  </section>
+
+  <section class="sheet-section">
+    <h2 class="sheet-h">States</h2>
+    <ul class="mock-list">
+      <li><a href="dashboard-loading.html">dashboard-loading</a><span class="desc">Snapshot query in flight — skeleton tiles</span><span class="l2chip">L2-009</span></li>
+      <li><a href="dashboard-error.html">dashboard-error</a><span class="desc">Snapshot failed — error panel with retry, layout intact</span><span class="l2chip">L2-009</span></li>
+      <li><a href="dashboard-empty.html">dashboard-empty</a><span class="desc">No telemetry stored yet — sample-publish hint</span><span class="l2chip">L2-006</span><span class="l2chip">L2-020</span></li>
+      <li><a href="dashboard-reconnecting.html">dashboard-reconnecting</a><span class="desc">SignalR outage — stale values, live paused</span><span class="l2chip">L2-012</span></li>
+      <li><a href="view-loading.html">view-loading</a><span class="desc">View library chunk downloading — ViewLoader fallback</span><span class="l2chip">L2-014</span></li>
+      <li><a href="series-detail-empty.html">series-detail-empty</a><span class="desc">Range returned no points — axis frame retained</span><span class="l2chip">L2-005</span></li>
+    </ul>
+  </section>
+
+  <section class="sheet-section">
+    <h2 class="sheet-h">Dialogs</h2>
+    <ul class="mock-list">
+      <li><a href="series-detail-range-dialog.html">series-detail-range-dialog</a><span class="desc">Select time range — From/To, 24&nbsp;h maximum</span><span class="l2chip">L2-005</span></li>
+      <li><a href="series-detail-range-invalid.html">series-detail-range-invalid</a><span class="desc">Range over 24&nbsp;h — validation error, Apply disabled</span><span class="l2chip">L2-005</span></li>
+    </ul>
+  </section>
+
+  <section class="sheet-section">
+    <h2 class="sheet-h">Sheets</h2>
+    <ul class="mock-list">
+      <li><a href="components.html">components</a><span class="desc">dashboard-core component sheet — tokens, variants, states</span><span class="l2chip">L2-005</span><span class="l2chip">L2-013</span><span class="l2chip">L2-015</span></li>
+    </ul>
+  </section>
+
+  <section class="sheet-section">
+    <h2 class="sheet-h">Harness</h2>
+    <ul class="mock-list">
+      <li><a href="responsive-preview.html">responsive-preview</a><span class="desc">Dashboard at 320 / 768 / 1200&nbsp;px side by side</span><span class="l2chip">L2-016</span></li>
+    </ul>
+  </section>
+</main>
+
+<footer class="mock-note">Mocks are documentation: no build step, no external requests, flavor-only JavaScript. Out of scope by design (L1-008/L1-009): auth, settings, filters, alarms, exports.</footer>
+
+</body>
+</html>

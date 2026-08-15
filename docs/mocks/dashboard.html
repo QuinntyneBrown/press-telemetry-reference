@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard — Press Telemetry Mock</title>
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/mocks.css">
+</head>
+<body>
+
+<header class="app-header">
+  <div class="brand">Press Telemetry</div>
+  <div class="conn conn--ok" role="status"><span class="conn__dot"></span>Connected</div>
+</header>
+
+<div class="toolbar">
+  <h1 class="toolbar__title">Overview</h1>
+  <div class="toolbar__spacer"></div>
+  <span class="toolbar__range">2 devices · 8 series</span>
+</div>
+
+<main class="main">
+  <div class="grid">
+
+    <div class="tile">
+      <div class="tile__head"><span class="label">temperature</span><span class="tile__device">press-01</span></div>
+      <div class="tile__value">87.4 <span class="tile__unit">degC</span><span class="pulse" aria-hidden="true"></span></div>
+      <div class="tile__ts">2026-08-15T12:00:07Z</div>
+    </div>
+
+    <div class="tile">
+      <div class="tile__head"><span class="label">pressure</span><span class="tile__device">press-01</span></div>
+      <div class="tile__value">210.3 <span class="tile__unit">bar</span><span class="pulse" aria-hidden="true"></span></div>
+      <div class="tile__ts">2026-08-15T12:00:07Z</div>
+    </div>
+
+    <div class="tile">
+      <div class="tile__head"><span class="label">vibration</span><span class="tile__device">press-01</span></div>
+      <div class="tile__value">2.8 <span class="tile__unit">mm/s</span></div>
+      <div class="tile__ts">2026-08-15T12:00:06Z</div>
+    </div>
+
+    <div class="tile">
+      <div class="tile__head"><span class="label">cycle_count</span><span class="tile__device">press-01</span></div>
+      <div class="tile__value"><span id="cycles">148392</span> <span class="tile__unit">cycles</span><span class="pulse" aria-hidden="true"></span></div>
+      <div class="tile__ts" id="cycles-ts">2026-08-15T12:00:07Z</div>
+    </div>
+
+    <div class="tile">
+      <div class="tile__head"><span class="label">temperature</span><span class="tile__device">press-02</span></div>
+      <div class="tile__value">79.1 <span class="tile__unit">degC</span></div>
+      <div class="tile__ts">2026-08-15T12:00:05Z</div>
+    </div>
+
+    <div class="tile">
+      <div class="tile__head"><span class="label">pressure</span><span class="tile__device">press-02</span></div>
+      <div class="tile__value">198.7 <span class="tile__unit">bar</span></div>
+      <div class="tile__ts">2026-08-15T12:00:05Z</div>
+    </div>
+
+    <div class="tile">
+      <div class="tile__head"><span class="label">vibration</span><span class="tile__device">press-02</span></div>
+      <div class="tile__value">4.6 <span class="tile__unit">mm/s</span></div>
+      <div class="tile__ts">2026-08-15T12:00:04Z</div>
+    </div>
+
+    <div class="tile">
+      <div class="tile__head"><span class="label">cycle_count</span><span class="tile__device">press-02</span></div>
+      <div class="tile__value">131077 <span class="tile__unit">cycles</span></div>
+      <div class="tile__ts">2026-08-15T12:00:05Z</div>
+    </div>
+
+    <div class="card">
+      <div class="card__head">
+        <span class="label">press-01 · temperature</span>
+        <span class="card__spacer"></span>
+        <span class="toolbar__range">last 5 min</span>
+        <span class="live-tag">Live</span>
+      </div>
+      <div class="chartbox">
+        <div class="ylabels" aria-hidden="true"><span>88.0</span><span>87.4</span><span>86.8</span></div>
+        <svg class="chart" viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label="Temperature of press-01 over the last five minutes, holding near 87.4 degrees Celsius">
+          <line class="gridline" x1="0" y1="0" x2="100" y2="0"></line>
+          <line class="gridline" x1="0" y1="50" x2="100" y2="50"></line>
+          <line class="gridline" x1="0" y1="100" x2="100" y2="100"></line>
+          <polyline class="series" style="stroke: var(--color-data-1)" points="0,57 1.7,43.3 3.4,46.6 5.1,34.9 6.8,41.8 8.5,41 10.2,39 11.9,32.2 13.6,37 15.3,22 16.9,34.6 18.6,30.2 20.3,21.5 22,33.6 23.7,19.2 25.4,25.8 27.1,22.3 28.8,32.1 30.5,37.3 32.2,32.9 33.9,35.5 35.6,42.6 37.3,39.8 39,41.6 40.7,35 42.4,52.8 44.1,56.9 45.8,45.4 47.5,45.6 49.2,60.7 50.8,56.5 52.5,66.5 54.2,68.8 55.9,63.1 57.6,61.7 59.3,71.4 61,73.1 62.7,80.8 64.4,68.8 66.1,64.3 67.8,64.4 69.5,75.8 71.2,68.3 72.9,70.9 74.6,69.9 76.3,71.1 78,67 79.7,56.8 81.4,62.3 83.1,69 84.7,63.8 86.4,59.6 88.1,55.7 89.8,50.7 91.5,54.2 93.2,48.3 94.9,50.1 96.6,40.4 98.3,44.1 100,31.2"></polyline>
+        </svg>
+        <div class="xlabels" aria-hidden="true"><span>11:55</span><span>12:00</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card__head">
+        <span class="label">press-01 · pressure</span>
+        <span class="card__spacer"></span>
+        <span class="toolbar__range">last 5 min</span>
+        <span class="live-tag">Live</span>
+      </div>
+      <div class="chartbox">
+        <div class="ylabels" aria-hidden="true"><span>216</span><span>210</span><span>204</span></div>
+        <svg class="chart" viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label="Pressure of press-01 over the last five minutes, cycling between roughly 206 and 214 bar">
+          <line class="gridline" x1="0" y1="0" x2="100" y2="0"></line>
+          <line class="gridline" x1="0" y1="50" x2="100" y2="50"></line>
+          <line class="gridline" x1="0" y1="100" x2="100" y2="100"></line>
+          <polyline class="series" style="stroke: var(--color-data-2)" points="0,45.8 1.7,35.2 3.4,31.1 5.1,18 6.8,17.8 8.5,19.9 10.2,21.1 11.9,31.2 13.6,32.3 15.3,44.6 16.9,49.8 18.6,55.4 20.3,68.7 22,66.6 23.7,79.8 25.4,71.7 27.1,76.4 28.8,70.1 30.5,66 32.2,50.2 33.9,41.3 35.6,31 37.3,20.7 39,19.5 40.7,21.9 42.4,18.9 44.1,29.6 45.8,28 47.5,44.1 49.2,44.6 50.8,59.5 52.5,63 54.2,65.8 55.9,70.6 57.6,69.8 59.3,68.5 61,68.4 62.7,66.3 64.4,55.6 66.1,45.6 67.8,36 69.5,34.6 71.2,26 72.9,16.6 74.6,18.5 76.3,25.2 78,27.6 79.7,34 81.4,40.1 83.1,47.5 84.7,56.5 86.4,62 88.1,70.4 89.8,73.3 91.5,70.6 93.2,70.5 94.9,69.5 96.6,67.3 98.3,56.5 100,41.2"></polyline>
+        </svg>
+        <div class="xlabels" aria-hidden="true"><span>11:55</span><span>12:00</span></div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<footer class="mock-note">Mock: dashboard overview — hydrated from <code>GET /api/telemetry/latest</code>, live via SignalR at ~1 Hz. Traces to L2-006, L2-009, L2-011, L2-013, L2-015, L2-016.</footer>
+
+<script>
+// Flavor only (~1 Hz live feel, L2-011); the mock is complete with JS disabled.
+(function () {
+  var el = document.getElementById('cycles'), ts = document.getElementById('cycles-ts');
+  if (!el) return;
+  var n = 148392, s = 7;
+  setInterval(function () {
+    n += 1; s += 1;
+    el.textContent = String(n);
+    ts.textContent = '2026-08-15T12:' + String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0') + 'Z';
+  }, 1000);
+})();
+</script>
+
+</body>
+</html>

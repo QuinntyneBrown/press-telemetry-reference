@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Responsive Preview — Press Telemetry Mock</title>
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/mocks.css">
+<style>
+  .frames { display: flex; gap: var(--space-4); align-items: flex-start; overflow-x: auto; padding: var(--space-4); }
+  .frame { flex: none; }
+  .frame figure { margin: 0; }
+  .frame figcaption { margin-bottom: var(--space-2); }
+  .frame iframe {
+    display: block;
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-1);
+    background: var(--color-surface-base);
+    height: 640px;
+  }
+  .harness-note { padding: 0 var(--space-4) var(--space-3); color: var(--color-text-muted); max-width: 60rem; }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="brand">Press Telemetry</div>
+  <span class="label">Mock harness</span>
+</header>
+
+<div class="toolbar">
+  <h1 class="toolbar__title">Responsive preview — dashboard at 320 / 768 / 1200 px</h1>
+</div>
+
+<p class="harness-note">
+  Each frame loads <a href="dashboard.html">dashboard.html</a> at a fixed width; the fluid
+  auto-fit grid (<code>minmax(min(22rem, 100%), 1fr)</code>) produces the column counts without
+  media queries or JavaScript. For L2-016 AC3, open any mock directly and resize the window
+  continuously from 320 to 1920&nbsp;px — nothing clips or overlaps. This harness page scrolls
+  its frame strip horizontally by design.
+</p>
+
+<div class="frames">
+  <div class="frame">
+    <figure>
+      <figcaption class="label">320 px — XS: single column, no horizontal scroll (L2-016 AC1)</figcaption>
+      <iframe src="dashboard.html" width="320" title="Dashboard at 320 pixels"></iframe>
+    </figure>
+  </div>
+  <div class="frame">
+    <figure>
+      <figcaption class="label">768 px — MD: at least two columns (L2-016 AC2)</figcaption>
+      <iframe src="dashboard.html" width="768" title="Dashboard at 768 pixels"></iframe>
+    </figure>
+  </div>
+  <div class="frame">
+    <figure>
+      <figcaption class="label">1200 px — XL: at least three columns (L2-016 AC2)</figcaption>
+      <iframe src="dashboard.html" width="1200" title="Dashboard at 1200 pixels"></iframe>
+    </figure>
+  </div>
+</div>
+
+<footer class="mock-note">Mock: responsive harness — DashboardGrid column behavior at the mandated widths. Traces to L2-016 AC1–AC3.</footer>
+
+</body>
+</html>

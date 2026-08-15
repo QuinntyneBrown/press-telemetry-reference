@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Series Detail: Empty Range — Press Telemetry Mock</title>
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/mocks.css">
+<style>
+  /* Empty-range overlay: the axis frame stays, the plot area carries the message. */
+  .plot { position: relative; }
+  .plot__empty {
+    position: absolute;
+    inset: 0;
+    /* offset the xlabels row so the message centres on the plot, not the whole chartbox */
+    padding-bottom: calc(var(--text-xs) + var(--space-1));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-1);
+    text-align: center;
+    pointer-events: none;
+  }
+  .plot__empty-title { font-size: 15px; color: var(--color-text-secondary); }
+  .plot__empty-range { font-family: var(--font-data); font-size: var(--text-xs); color: var(--color-text-muted); }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="brand">Press Telemetry</div>
+  <div class="conn conn--ok" role="status"><span class="conn__dot"></span>Connected</div>
+</header>
+
+<div class="toolbar">
+  <a href="dashboard.html">← Overview</a>
+  <h1 class="toolbar__title">press-01 · temperature</h1>
+  <div class="toolbar__spacer"></div>
+  <button class="chip" type="button">1H</button>
+  <button class="chip" type="button">6H</button>
+  <button class="chip" type="button">24H</button>
+  <button class="chip chip--active" type="button">Custom</button>
+  <span class="toolbar__range">2026-08-13 00:00 → 2026-08-13 06:00 UTC</span>
+</div>
+
+<main class="main">
+  <div class="card">
+    <div class="card__head">
+      <span class="label">press-01 · temperature</span>
+      <span class="card__spacer"></span>
+    </div>
+    <div class="plot">
+      <div class="chartbox">
+        <div class="ylabels" aria-hidden="true"><span>95</span><span>57.5</span><span>20</span></div>
+        <svg class="chart" viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label="Empty temperature chart for press-01: the 20 to 95 degrees Celsius axis frame is retained, but the selected range returned no points">
+          <line class="gridline" x1="0" y1="0" x2="100" y2="0"></line>
+          <line class="gridline" x1="0" y1="50" x2="100" y2="50"></line>
+          <line class="gridline" x1="0" y1="100" x2="100" y2="100"></line>
+        </svg>
+        <div class="xlabels" aria-hidden="true"><span>00:00</span><span>01:00</span><span>02:00</span><span>03:00</span><span>04:00</span><span>05:00</span><span>06:00</span></div>
+      </div>
+      <div class="plot__empty">
+        <div class="plot__empty-title">No data in this range</div>
+        <div class="plot__empty-range">2026-08-13 00:00 → 2026-08-13 06:00 UTC</div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="mock-note">Mock: series detail — applied range returned <code>200</code> with an empty array; the axis frame is retained rather than collapsing the chart. Traces to L2-005 AC2.</footer>
+
+</body>
+</html>

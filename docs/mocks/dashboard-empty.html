@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard Empty — Press Telemetry Mock</title>
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/mocks.css">
+<style>
+  /* Sample publish command; raised above the panel surface, scrolls rather than wrapping. */
+  .panel__code {
+    margin: 0;
+    padding: var(--space-3);
+    background: var(--color-surface-overlay);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius-1);
+    font-family: var(--font-data);
+    font-size: var(--text-xs);
+    color: var(--color-text-secondary);
+    text-align: left;
+    overflow-x: auto;
+  }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="brand">Press Telemetry</div>
+  <div class="conn conn--ok" role="status"><span class="conn__dot"></span>Connected</div>
+</header>
+
+<div class="toolbar">
+  <h1 class="toolbar__title">Overview</h1>
+  <div class="toolbar__spacer"></div>
+</div>
+
+<main class="main">
+  <div class="grid">
+
+    <div class="panel">
+      <h2 class="panel__title">No telemetry yet</h2>
+      <p class="panel__detail">Nothing has been stored for any series. Publish a sample point and it appears here within seconds:</p>
+      <pre class="panel__code">mosquitto_pub -t telemetry/press-01/temperature \
+  -m '{"deviceId":"press-01","metric":"temperature","value":87.4,"timestamp":"2026-08-15T12:00:00Z"}'</pre>
+    </div>
+
+  </div>
+</main>
+
+<footer class="mock-note">Mock: dashboard empty state — <code>GET /api/telemetry/latest</code> returned <code>200 []</code>. Traces to L2-006 AC3, L2-020 AC3.</footer>
+
+</body>
+</html>

@@ -1,0 +1,19 @@
+{
+  "name": "@press/telemetry-dashboard-view",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@microsoft/signalr": "^8.0.7",
+    "@press/dashboard-core": "*",
+    "@tanstack/react-query": "^5.62.0",
+    "react-router": "^7.1.0"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  }
+}

@@ -1,0 +1,58 @@
+/* Press Telemetry — dashboard-core theme (L2-015).
+   Verbatim copy of docs/mocks/assets/tokens.css, the visual contract for this file.
+   The ONLY file in the frontend allowed to contain color literals (L2-015 AC2). */
+
+:root {
+  color-scheme: dark;
+
+  /* Surfaces — hue 220, saturation 8% (<= 10%), luminance annotated */
+  --color-surface-base:    hsl(220 8% 8%);   /* #131416  Y ~= 0.006  page */
+  --color-surface-raised:  hsl(220 8% 12%);  /* #1C1E21  Y ~= 0.013  tiles, cards, header */
+  --color-surface-overlay: hsl(220 8% 16%);  /* #25282C  Y ~= 0.020  dialogs, chips */
+  --color-skeleton:        hsl(220 8% 14%);  /* shimmer base */
+  --color-skeleton-hi:     hsl(220 8% 18%);  /* shimmer highlight */
+  --color-scrim:           hsl(220 8% 4% / 0.6);
+
+  /* Borders / chart chrome */
+  --color-border-subtle:   hsl(220 8% 20%);
+  --color-border-strong:   hsl(220 8% 30%);
+  --color-grid-line:       hsl(220 8% 20%);  /* recessive chart gridlines */
+
+  /* Text — contrast vs worst surface (overlay): 10.0 / 5.3 / 4.8 : 1 */
+  --color-text-primary:    hsl(220 12% 88%); /* #DDDFE4 */
+  --color-text-secondary:  hsl(220 8% 68%);  /* #A7ABB4 */
+  --color-text-muted:      hsl(220 6% 58%);  /* #8D929A  labels, axes, timestamps */
+
+  /* Accent — live-data emphasis, distinct from static text (L2-015 AC3) */
+  --color-accent-live:     hsl(190 65% 60%); /* #57C5DB  pulse dot, LIVE tag, primary action, focus */
+
+  /* Status — connection states; always paired with a text label, never color alone */
+  --color-status-ok:       hsl(145 50% 55%); /* #53C683  connected */
+  --color-status-warn:     hsl(42 75% 58%);  /* #E4B444  connecting / reconnecting */
+  --color-status-error:    hsl(10 70% 62%);  /* #E2715A  disconnected, errors, validation */
+
+  /* Data series — fixed assignment order, never cycled (validated 2026-08-15) */
+  --color-data-1: #3987e5; /* blue   */
+  --color-data-2: #d95926; /* orange */
+  --color-data-3: #199e70; /* aqua   */
+  --color-data-4: #c98500; /* yellow */
+
+  /* Spacing / shape */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --radius-1: 2px;
+
+  /* Type */
+  --font-ui: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-data: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --text-xs: 11px;   /* uppercase tracked labels */
+  --text-sm: 13px;
+  --text-value: 28px;
+  --track: 0.08em;
+
+  /* Layout */
+  --tile-min: 22rem; /* DashboardGrid minimum tile width */
+}

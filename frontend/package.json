@@ -1,0 +1,27 @@
+{
+  "name": "@press/frontend",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "libs/*",
+    "e2e"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w @press/dashboard",
+    "build": "npm run typecheck && npm run build -w @press/dashboard",
+    "preview": "npm run preview -w @press/dashboard",
+    "typecheck": "tsc -p tsconfig.json",
+    "lint": "eslint .",
+    "e2e": "playwright test -c e2e/playwright.config.ts",
+    "e2e:ui": "playwright test -c e2e/playwright.config.ts --ui",
+    "e2e:headed": "playwright test -c e2e/playwright.config.ts --headed",
+    "e2e:report": "playwright show-report e2e/playwright-report"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "eslint": "^9.17.0",
+    "typescript": "^5.7.0",
+    "typescript-eslint": "^8.19.0"
+  }
+}
