@@ -68,8 +68,13 @@ docker compose ps --all
 ```
 
 Compose starts Mosquitto, Couchbase 7.6 Enterprise, and Redis. A one-time initializer creates
-the `telemetry` bucket and primary index. Continue when the three long-running services are
-healthy and `couchbase-init` has exited with code `0`.
+the `telemetry` bucket and primary index. Continue when Mosquitto and Redis are healthy and
+`couchbase-init` has exited with code `0`.
+
+> [!NOTE]
+> After cluster initialization, Compose can label Couchbase `unhealthy` because the container
+> probe calls an endpoint that now requires credentials. A successful `couchbase-init` and the
+> API readiness check in step 4 confirm that Couchbase is available to the application.
 
 ### 3. Start the application
 
@@ -110,14 +115,14 @@ Publish a sample point. The publisher is simulated here because it is not part o
 reference implementation.
 
 ```sh
-docker compose exec mosquitto mosquitto_pub -t telemetry/press-01/temperature -m '{"deviceId":"press-01","metric":"temperature","value":87.4,"timestamp":"2026-08-15T12:00:00Z"}'
+docker compose exec mosquitto sh -c 'mosquitto_pub -t telemetry/press-01/temperature -m "{\"deviceId\":\"press-01\",\"metric\":\"temperature\",\"value\":87.4,\"timestamp\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}"'
 ```
 
-The `press-01` temperature appears on the dashboard. You can also query it directly:
+The command timestamps the point with the current UTC time, and the `press-01` temperature
+appears on the dashboard. You can also query the latest values directly:
 
 ```sh
 curl http://localhost:5063/api/telemetry/latest
-curl "http://localhost:5063/api/telemetry/press-01/temperature?from=2026-08-15T12:00:00Z&to=2026-08-15T13:00:00Z"
 ```
 
 Stop the infrastructure when you are finished:
