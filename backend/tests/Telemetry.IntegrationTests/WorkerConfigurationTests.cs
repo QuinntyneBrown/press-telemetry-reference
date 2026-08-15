@@ -30,7 +30,23 @@ public sealed class WorkerConfigurationTests(TelemetryEnvironment environment)
         Environment.SetEnvironmentVariable("Worker__MqttTopicFilter", "overridden/#");
         try
         {
-            using var host = WorkerHost.CreateBuilder([]).Build();
+            var builder = WorkerHost.CreateBuilder([]);
+            // Stand-in for the committed appsettings.json defaults, inserted beneath the
+            // environment-variable provider the host builder already added.
+            builder.Configuration.Sources.Insert(0, new Microsoft.Extensions.Configuration.Memory.MemoryConfigurationSource
+            {
+                InitialData = new Dictionary<string, string?>
+                {
+                    ["Worker:MqttBroker"] = "mqtt://localhost:1883",
+                    ["Worker:MqttTopicFilter"] = "telemetry/#",
+                    ["Worker:CouchbaseConnectionString"] = "couchbase://localhost",
+                    ["Worker:CouchbaseUsername"] = "Administrator",
+                    ["Worker:CouchbasePassword"] = "password",
+                    ["Worker:CouchbaseBucket"] = "telemetry",
+                    ["Worker:RedisConnectionString"] = "localhost:6379",
+                },
+            });
+            using var host = builder.Build();
             var options = host.Services.GetRequiredService<IOptions<WorkerOptions>>().Value;
             Assert.Equal("overridden/#", options.MqttTopicFilter);
         }

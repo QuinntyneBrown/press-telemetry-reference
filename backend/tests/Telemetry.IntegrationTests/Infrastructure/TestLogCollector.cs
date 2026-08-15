@@ -25,6 +25,7 @@ public sealed class TestLogCollector : ILoggerProvider
         public bool IsEnabled(LogLevel logLevel) => true;
 
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
-            => entries.Enqueue(new LogEntry(logLevel, category, formatter(state, exception)));
+            => entries.Enqueue(new LogEntry(logLevel, category,
+                exception is null ? formatter(state, exception) : $"{formatter(state, exception)} | {exception}"));
     }
 }

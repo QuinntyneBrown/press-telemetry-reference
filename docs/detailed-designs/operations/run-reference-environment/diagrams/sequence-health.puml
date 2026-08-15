@@ -20,7 +20,7 @@ box "Frontend — Health client" #E0F2FE
 end box
 box "Backend — Telemetry API application" #D1FADF
   participant "GET /health" as endpoint
-  participant "TelemetryHealthCheck" as health
+  participant "HealthCheckService\n(Couchbase + Redis readiness checks)" as health
   participant "Structured logger" as logger
 end box
 box "Backend — External infrastructure" #FFF4E5

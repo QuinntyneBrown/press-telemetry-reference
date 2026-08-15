@@ -18,50 +18,56 @@ class TelemetryPoint <<record>> {
   +DateTimeOffset Timestamp
 }
 
-class IngestionOptions {
-  +Uri BrokerAddress
-  +string TopicFilter
-  +Validate(): void
+class WorkerOptions {
+  +string MqttBroker
+  +string MqttTopicFilter
+  +string CouchbaseConnectionString
+  +string CouchbaseUsername
+  +string CouchbasePassword
+  +string CouchbaseBucket
+  +string RedisConnectionString
 }
 
 class TelemetryIngestionWorker {
   +ExecuteAsync(token: CancellationToken): Task
-  -ProcessAsync(payload: ReadOnlyMemory<byte>, token: CancellationToken): Task
+  -PumpAsync(persist: ChannelWriter<TelemetryPoint>, live: ChannelWriter<TelemetryPoint>, token): Task
+  -ConsumeAsync(reader: ChannelReader<TelemetryPoint>, handle, token): Task
 }
 
 class MqttTelemetrySource {
-  +ConnectAsync(token: CancellationToken): Task
-  +SubscribeAsync(topicFilter: string, qos: 0, token: CancellationToken): Task
+  +RunAsync(token: CancellationToken): Task
   +Messages(token: CancellationToken): IAsyncEnumerable<ReadOnlyMemory<byte>>
 }
 
 class TelemetryPointParser {
-  +Parse(payload: ReadOnlySpan<byte>): ParseResult<TelemetryPoint>
+  +Parse(payload: ReadOnlyMemory<byte>): ParseResult
 }
 
 class CouchbaseTimeSeriesWriter {
   +AppendAsync(point: TelemetryPoint, token: CancellationToken): Task
-  -BuildKey(point: TelemetryPoint): TimeSeriesDocumentKey
-  -UpsertBucketAsync(key: TimeSeriesDocumentKey, point: TelemetryPoint): Task
+  -UpsertBucketAsync(key: TimeSeriesDocumentKey, point: TelemetryPoint, token): Task
 }
 
 class TimeSeriesDocumentKey <<record>> {
   +string DeviceId
   +string Metric
   +DateTimeOffset HourStart
+  +{static} For(point: TelemetryPoint): TimeSeriesDocumentKey
 }
 
 class TimeSeriesDocument <<document>> {
-  +DateTimeOffset ts_start
-  +DateTimeOffset ts_end
-  +double[] ts_data
+  +string deviceId
+  +string metric
+  +long ts_start
+  +long ts_end
+  +[epochMillis, value][] ts_data
 }
 
 class RedisTelemetryPublisher {
   +PublishAsync(point: TelemetryPoint, token: CancellationToken): Task
 }
 
-TelemetryIngestionWorker --> IngestionOptions : reads
+TelemetryIngestionWorker --> WorkerOptions : reads
 TelemetryIngestionWorker ..> MqttTelemetrySource : controls
 TelemetryIngestionWorker ..> TelemetryPointParser : validates with
 TelemetryIngestionWorker ..> CouchbaseTimeSeriesWriter : persists through
@@ -71,4 +77,11 @@ CouchbaseTimeSeriesWriter ..> TelemetryPoint : appends
 CouchbaseTimeSeriesWriter ..> TimeSeriesDocumentKey : derives
 CouchbaseTimeSeriesWriter ..> TimeSeriesDocument : creates / appends
 RedisTelemetryPublisher ..> TelemetryPoint : publishes
+
+note bottom of TimeSeriesDocument
+  Irregular time series format: ts_data holds
+  [epochMillis, value] pairs; ts_start / ts_end are
+  the fixed hourly bucket bounds in epoch milliseconds.
+  deviceId and metric enable SQL++ filtering.
+end note
 @enduml

@@ -17,8 +17,12 @@ class TelemetryController {
 }
 
 class TelemetryQueryValidator {
-  +ValidateSeries(deviceId: string, metric: string): ValidationResult
-  +ValidateRange(from: string, to: string, maxWindow: TimeSpan): ValidationResult
+  +ValidateRange(deviceId: string, metric: string, from: string, to: string): RangeValidation
+  +ValidateSeries(deviceId: string, metric: string, errors): void
+}
+
+class CouchbaseConnection {
+  +GetClusterAsync(): Task<ICluster>
 }
 
 class CouchbaseTelemetryReader {
@@ -45,19 +49,32 @@ class TelemetryPointDto <<record>> {
   +DateTimeOffset Timestamp
 }
 
-class TelemetryHub {
-  +BroadcastAsync(point: TelemetryPointDto, token: CancellationToken): Task
+class TelemetryHub <<Hub>> {
 }
 
-class RedisLiveStream {
-  +DeliverAsync(point: TelemetryPointDto, token: CancellationToken): Task
+class RedisLiveStream <<BackgroundService>> {
+  +ExecuteAsync(token: CancellationToken): Task
+  -DeliverAsync(payload: RedisValue, token: CancellationToken): Task
 }
 
 TelemetryController ..> TelemetryQueryValidator : validates with
 TelemetryController ..> CouchbaseTelemetryReader : queries through
+CouchbaseTelemetryReader ..> CouchbaseConnection : connects through
 CouchbaseTelemetryReader ..> RangeQuery : accepts
 CouchbaseTelemetryReader ..> SeriesPointDto : returns
 CouchbaseTelemetryReader ..> TelemetryPointDto : returns
-RedisLiveStream ..> TelemetryHub : sends through
+RedisLiveStream ..> TelemetryHub : broadcasts via IHubContext
 RedisLiveStream ..> TelemetryPointDto : delivers
+
+note bottom of TelemetryHub
+  Deliberately empty: clients receive "telemetry"
+  messages without any subscription operations or
+  server-side series groups.
+end note
+
+note bottom of RedisLiveStream
+  Subscribes to the Redis pub/sub channel "telemetry"
+  (camelCase JSON points published by the worker) and
+  broadcasts to every client of this API instance.
+end note
 @enduml

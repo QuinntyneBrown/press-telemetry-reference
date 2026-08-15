@@ -12,14 +12,20 @@ skinparam class {
 title Class structure — Run the reference environment
 
 class WorkerOptions {
-  +Uri MqttBroker
+  +string MqttBroker
   +string MqttTopicFilter
   +string CouchbaseConnectionString
+  +string CouchbaseUsername
+  +string CouchbasePassword
+  +string CouchbaseBucket
   +string RedisConnectionString
 }
 
 class ApiOptions {
   +string CouchbaseConnectionString
+  +string CouchbaseUsername
+  +string CouchbasePassword
+  +string CouchbaseBucket
   +string RedisConnectionString
   +string[] CorsOrigins
 }
@@ -36,35 +42,36 @@ class ApiOptionsValidator {
   +Validate(name: string, options: ApiOptions): ValidateOptionsResult
 }
 
-class StructuredLoggingOptions {
-  +LogLevel MinimumLevel
-}
-
-class TelemetryHealthCheck {
+interface IHealthCheck {
   +CheckHealthAsync(context: HealthCheckContext, token: CancellationToken): Task~HealthCheckResult~
 }
 
 class CouchbaseReadinessCheck {
-  +CheckAsync(token: CancellationToken): Task~DependencyStatus~
+  +CheckHealthAsync(context: HealthCheckContext, token: CancellationToken): Task~HealthCheckResult~
 }
 
 class RedisReadinessCheck {
-  +CheckAsync(token: CancellationToken): Task~DependencyStatus~
+  +CheckHealthAsync(context: HealthCheckContext, token: CancellationToken): Task~HealthCheckResult~
 }
 
-class HealthReport <<record>> {
-  +DependencyStatus Couchbase
-  +DependencyStatus Redis
-  +HealthStatus Overall
+class "HealthCheckService (built-in)" as HealthCheckService {
+  +CheckHealthAsync(token: CancellationToken): Task~HealthReport~
 }
 
 IValidateOptions <|.. WorkerOptionsValidator
 IValidateOptions <|.. ApiOptionsValidator
 WorkerOptionsValidator ..> WorkerOptions : validates
 ApiOptionsValidator ..> ApiOptions : validates
-TelemetryHealthCheck *-- CouchbaseReadinessCheck : aggregates
-TelemetryHealthCheck *-- RedisReadinessCheck : aggregates
-TelemetryHealthCheck ..> HealthReport : creates
-WorkerOptions --> StructuredLoggingOptions : accompanies
-ApiOptions --> StructuredLoggingOptions : accompanies
+IHealthCheck <|.. CouchbaseReadinessCheck
+IHealthCheck <|.. RedisReadinessCheck
+HealthCheckService o-- CouchbaseReadinessCheck : aggregates
+HealthCheckService o-- RedisReadinessCheck : aggregates
+
+note bottom of HealthCheckService
+  ASP.NET Core's built-in aggregation serves GET /health:
+  a custom response writer emits per-dependency status as
+  JSON; 200 when all healthy, 503 otherwise. No hand-rolled
+  aggregator exists. Structured JSON logging and levels come
+  from the built-in Logging configuration in both processes.
+end note
 @enduml

@@ -2,6 +2,7 @@ import { test as base } from '@playwright/test';
 import { TelemetryApiMock } from './support/telemetry-api-mock';
 import { SignalRHubMock } from './support/signalr-hub-mock';
 import { DashboardPage } from './pages/dashboard-page';
+import { SeriesDetailPage } from './pages/series-detail-page';
 import { T0 } from './support/time';
 
 interface Fixtures {
@@ -10,10 +11,14 @@ interface Fixtures {
   api: TelemetryApiMock;
   hub: SignalRHubMock;
   dashboard: DashboardPage;
+  seriesDetail: SeriesDetailPage;
 }
 
 export const test = base.extend<Fixtures>({
   fakeClock: [false, { option: true }],
+  // Auto-ticking fake clock from T0. Never pause before load — the app boot
+  // path needs ticking timers and renders a blank page under a paused clock.
+  // Specs that need frozen time call freezeAt(page, seconds) AFTER hydration.
   page: async ({ page, fakeClock }, use) => {
     if (fakeClock) await page.clock.install({ time: T0 });
     await use(page);
@@ -34,6 +39,11 @@ export const test = base.extend<Fixtures>({
     void api;
     void hub;
     await use(new DashboardPage(page));
+  },
+  seriesDetail: async ({ page, api, hub }, use) => {
+    void api;
+    void hub;
+    await use(new SeriesDetailPage(page));
   },
 });
 

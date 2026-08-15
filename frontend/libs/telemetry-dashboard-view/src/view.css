@@ -44,7 +44,10 @@
   background: var(--color-surface-overlay);
 }
 
-.main { flex: 1; padding: var(--space-4); }
+/* Tiles are links to their series detail; keep tile typography, not link styling. */
+.tile-link { color: inherit; display: block; }
+.tile-link:hover { text-decoration: none; }
+.tile-link .tile:hover { border-color: var(--color-border-strong); }
 
 .btn {
   font: 600 var(--text-xs) var(--font-ui);

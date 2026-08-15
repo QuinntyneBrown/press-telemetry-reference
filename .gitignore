@@ -1,6 +1,8 @@
 # .NET
 bin/
 obj/
+*.user
+.vs/
 
 # Node
 node_modules/
@@ -10,3 +12,7 @@ dist/
 test-results/
 playwright-report/
 blob-report/
+
+# Local configuration overrides (never commit secrets)
+appsettings.*.local.json
+.env

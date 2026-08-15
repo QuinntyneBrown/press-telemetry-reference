@@ -102,8 +102,17 @@ public sealed class TelemetryEnvironment : IAsyncLifetime
         await Task.WhenAll(_couchbase.DisposeAsync().AsTask(), _redis.DisposeAsync().AsTask(), _mosquitto.DisposeAsync().AsTask());
     }
 
-    /// <summary>Removes every stored telemetry point, for tests that need an empty store.</summary>
-    public Task FlushTelemetryAsync() => Cluster.Buckets.FlushBucketAsync(CouchbaseBucket);
+    /// <summary>
+    /// Removes every stored telemetry point, for tests that need an empty store. Uses a
+    /// query DELETE rather than a bucket flush: a flush triggers a GSI indexer rollback that
+    /// makes consistent queries fail transiently.
+    /// </summary>
+    public async Task FlushTelemetryAsync()
+    {
+        var result = await Cluster.QueryAsync<object>($"DELETE FROM `{CouchbaseBucket}`",
+            queryOptions => queryOptions.ScanConsistency(Couchbase.Query.QueryScanConsistency.RequestPlus));
+        _ = await result.Rows.ToListAsync();
+    }
 
     /// <summary>
     /// Seeds a stored point directly, using the same hourly time series document format the

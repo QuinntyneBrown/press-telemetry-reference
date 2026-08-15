@@ -25,9 +25,11 @@ The feature introduces the following parts in the ingestion worker.
 - **`CouchbaseTimeSeriesWriter`** — sole persistence component that creates or appends hourly `ts_start` / `ts_end` / `ts_data` documents with key-value sub-document operations.
 - **`TimeSeriesDocumentKey`** — value derived from `deviceId`, `metric`, and the point's UTC hourly time bucket.
 - **`RedisTelemetryPublisher`** — live-path adapter that publishes accepted points through the SignalR Redis backplane without an HTTP or SignalR listener.
-- **`IngestionOptions`** — validated configuration for broker address, topic filter, Couchbase settings, and Redis settings.
+- **`WorkerOptions`** — validated configuration for broker address, topic filter, Couchbase settings, and Redis settings; startup fails fast naming any missing setting.
 
-`TelemetryIngestionWorker` passes a point to persistence and live fan-out only after `TelemetryPointParser` accepts the payload. Couchbase persistence makes at most 3 attempts using the standard backoff policy. Redis publication remains independent of persistence so failure in either destination does not stall later messages.
+`TelemetryIngestionWorker` passes a point to persistence and live fan-out only after `TelemetryPointParser` accepts the payload. Couchbase persistence makes at most 3 attempts using the standard backoff policy. Validated points fan out through two independent in-process queues — one per destination — so failure or retry in either destination does not stall later messages or the other path.
+
+Live-path wire contract: the worker publishes each accepted point on the Redis pub/sub channel `telemetry` as camelCase JSON (`{"deviceId", "metric", "value", "timestamp"}` with an ISO-8601 UTC timestamp); each API instance subscribes to that channel and broadcasts to its own connected clients.
 
 ## Requirements
 

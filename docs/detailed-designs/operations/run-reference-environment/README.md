@@ -20,7 +20,7 @@ The feature introduces the following repository and runtime parts.
 - **`Telemetry.Api`** — second backend deployable exposing REST, SignalR, and `/health`.
 - **frontend workspace** — single React workspace containing dashboard applications and publishable libraries.
 - **options validation** — startup validation in each backend process that names any absent required setting and stops startup.
-- **`TelemetryHealthCheck`** — API readiness aggregation for Couchbase and Redis checks.
+- **`CouchbaseReadinessCheck` / `RedisReadinessCheck`** — per-dependency readiness checks aggregated by ASP.NET Core's built-in health check service into `GET /health` (200 when all healthy, 503 naming the unhealthy dependency).
 - **structured logging configuration** — shared log-level and connection-state event conventions for MQTT, Couchbase, and Redis.
 - **gitleaks verification command** — repository-history scan using the default gitleaks rules.
 - **root `README.md` runbook** — clean-clone setup, infrastructure initialization, process start commands, manual sample publish command, QoS 0 and Redis-outage delivery trade-offs, and production security boundary.

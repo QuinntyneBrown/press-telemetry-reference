@@ -1,5 +1,5 @@
 import { test, expect } from '../../fixtures';
-import { defaultDashboard } from '../../support/seed';
+import { defaultDashboard, lastFiveMinutes, rangePoints } from '../../support/seed';
 
 test.describe('App shell', () => {
   test('renders the brand and a connection indicator in the header', async ({ api, hub, dashboard }) => {
@@ -46,5 +46,41 @@ test.describe('Snapshot hydration', () => {
 
     await expect(dashboard.title()).toBeVisible();
     await expect(dashboard.summary()).toHaveText('2 devices · 8 series');
+  });
+});
+
+test.describe('Overview charts', () => {
+  test.use({ fakeClock: true });
+
+  // L2-009 AC1 — the range endpoint hydrates visible charts through TanStack Query.
+  test('renders chart cards for the first two snapshot series from seeded range data', async ({ api, dashboard }) => {
+    api.seedLatest(defaultDashboard());
+    // Seed a minute wider than the window so auto-tick drift never empties it.
+    const { to } = lastFiveMinutes();
+    const seedFrom = new Date(to.getTime() - 6 * 60_000);
+    api.seedRange('press-01', 'temperature', rangePoints(seedFrom, to, 5, i => 87 + (i % 10) / 10));
+    api.seedRange('press-01', 'pressure', rangePoints(seedFrom, to, 5, i => 206 + (i % 8)));
+
+    await dashboard.goto();
+
+    const temperature = dashboard.chartCard('press-01', 'temperature');
+    await expect(temperature.chart()).toBeVisible();
+    await expect(temperature.line()).toBeVisible();
+    expect(await temperature.pointCount()).toBeGreaterThan(50);
+
+    const pressure = dashboard.chartCard('press-01', 'pressure');
+    await expect(pressure.chart()).toBeVisible();
+    await expect(pressure.liveTag()).toBeVisible();
+
+    // The requested window is exactly 5 minutes wide for both charts.
+    const temperatureCall = api.calls.range.find(u => u.pathname === '/api/telemetry/press-01/temperature');
+    const pressureCall = api.calls.range.find(u => u.pathname === '/api/telemetry/press-01/pressure');
+    expect(temperatureCall).toBeTruthy();
+    expect(pressureCall).toBeTruthy();
+    for (const call of [temperatureCall!, pressureCall!]) {
+      const from = Date.parse(call.searchParams.get('from')!);
+      const to = Date.parse(call.searchParams.get('to')!);
+      expect(to - from).toBe(5 * 60_000);
+    }
   });
 });

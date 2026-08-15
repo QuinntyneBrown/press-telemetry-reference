@@ -41,6 +41,9 @@ a:hover { text-decoration: underline; }
 .conn--err  .conn__dot { background: var(--color-status-error); }
 @keyframes blink { 50% { opacity: 0.25; } }
 
+/* Page content region (also used by the app's view-loading fallback) */
+.main { flex: 1; padding: var(--space-4); }
+
 /* DashboardGrid */
 .grid {
   display: grid;

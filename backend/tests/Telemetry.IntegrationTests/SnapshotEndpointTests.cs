@@ -45,7 +45,16 @@ public sealed class SnapshotEndpointTests(TelemetryEnvironment environment)
         using var api = new ApiFactory(environment);
         using var http = api.CreateClient();
 
-        var body = await http.GetFromJsonAsync<JsonElement>("/api/telemetry/latest");
+        var response = await http.GetAsync("/api/telemetry/latest");
+        if (!response.IsSuccessStatusCode)
+        {
+            var errors = string.Join("\n---\n", api.Logs.Entries
+                .Where(entry => entry.Level >= Microsoft.Extensions.Logging.LogLevel.Error)
+                .Select(entry => entry.Message));
+            Assert.Fail($"latest returned {(int)response.StatusCode}; API errors:\n{errors}");
+        }
+
+        var body = await response.Content.ReadFromJsonAsync<JsonElement>();
 
         Assert.Equal(3, body.GetArrayLength());
         var entries = body.EnumerateArray().ToDictionary(

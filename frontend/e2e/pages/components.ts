@@ -49,4 +49,9 @@ export class ChartCard {
     const pts = await this.line().getAttribute('points');
     return pts ? pts.trim().split(/\s+/).length : 0;
   }
+
+  /** HTML x-axis labels (aria-hidden, so unreachable by role). */
+  xLabels(): Locator {
+    return this.root.locator('.xlabels span');
+  }
 }

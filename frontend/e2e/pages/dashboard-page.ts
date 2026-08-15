@@ -37,7 +37,8 @@ export class DashboardPage {
   }
 
   tiles(): Locator {
-    return this.page.locator('[data-testid^="tile-"]');
+    // Tile roots are tile-{deviceId}-{metric}; exclude the inner tile-value/tile-timestamp ids.
+    return this.page.getByTestId(/^tile-(?!value$|timestamp$).+/);
   }
 
   chartCard(deviceId: string, metric: string): ChartCard {
@@ -58,6 +59,10 @@ export class DashboardPage {
 
   emptyPanel(): Locator {
     return this.page.getByRole('heading', { name: 'No telemetry yet' });
+  }
+
+  emptySnippet(): Locator {
+    return this.page.getByText(/mosquitto_pub -t telemetry/);
   }
 
   pausedBanner(): Locator {

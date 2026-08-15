@@ -5,6 +5,9 @@ import { ViewLoader } from './ViewLoader';
 const OverviewView = lazy(() =>
   import('@press/telemetry-dashboard-view').then(m => ({ default: m.TelemetryDashboardView })),
 );
+const SeriesDetailView = lazy(() =>
+  import('@press/telemetry-dashboard-view').then(m => ({ default: m.TelemetrySeriesDetailView })),
+);
 
 export function DashboardRoutes() {
   return (
@@ -14,6 +17,14 @@ export function DashboardRoutes() {
         element={
           <ViewLoader>
             <OverviewView />
+          </ViewLoader>
+        }
+      />
+      <Route
+        path="/series/:deviceId/:metric"
+        element={
+          <ViewLoader>
+            <SeriesDetailView />
           </ViewLoader>
         }
       />

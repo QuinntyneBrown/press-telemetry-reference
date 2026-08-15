@@ -20,7 +20,8 @@ The feature introduces the following API parts.
 - **`TelemetryQueryValidator`** — boundary validator for device identifiers, metric names, ISO-8601 timestamps, range order, and the fixed 24-hour maximum window.
 - **`CouchbaseTelemetryReader`** — read-only adapter that runs `_timeseries()` range queries and an aggregate latest-series query over the time series documents.
 - **`TelemetryHub`** — SignalR hub endpoint that broadcasts each new telemetry point to every connected client.
-- **`RedisLiveStream`** — Redis backplane integration that routes each worker-published point to every API instance for local client broadcast.
+- **`RedisLiveStream`** — hosted background service in each API instance that subscribes to the Redis pub/sub channel `telemetry` (camelCase JSON points published by the worker) and broadcasts each point to that instance's connected clients through the hub.
+- **`CouchbaseConnection`** — lazy shared Couchbase cluster connection used by the reader and the health check; a failed connection attempt is retried on next use so the API starts (and reports unhealthy) while Couchbase is down.
 - **`TelemetryPointDto`** and **`SeriesPointDto`** — response contracts for snapshot/live data and historical series data.
 - **`ApiOptions`** — validated maximum query window and CORS origin allowlist.
 
