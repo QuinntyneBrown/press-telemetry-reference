@@ -1,0 +1,16 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Display live telemetry
+
+Person(user, "Dashboard user", "Monitors current and historical press telemetry")
+System_Boundary(solution, "Press telemetry reference") {
+  Container(frontend, "Dashboard application", "React and TanStack Query", "Renders cached REST data and applies batched SignalR updates")
+  Container(api, "Telemetry API", "ASP.NET Core and SignalR", "Serves snapshots, ranges, and live points")
+}
+
+Rel(user, frontend, "Uses", "HTTPS")
+Rel(frontend, api, "Loads snapshots and visible ranges", "JSON/HTTPS")
+Rel(frontend, api, "Connects to the broadcast hub", "SignalR/WebSocket")
+Rel(api, frontend, "Pushes live telemetry", "SignalR/WebSocket")
+@enduml

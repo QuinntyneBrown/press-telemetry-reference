@@ -1,0 +1,16 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Ingest telemetry
+
+System_Ext(publisher, "External telemetry publisher", "Publishes press measurements")
+System_Ext(mqtt, "MQTT broker", "Delivers telemetry topics")
+System(telemetry, "Press telemetry reference", "Validates, stores, and distributes telemetry")
+System_Ext(couchbase, "Couchbase", "Stores hourly time series documents")
+System_Ext(redis, "Redis", "Carries the SignalR live stream")
+
+Rel(publisher, mqtt, "Publishes telemetry to", "MQTT")
+Rel(mqtt, telemetry, "Delivers subscribed messages to", "MQTT QoS 0")
+Rel(telemetry, couchbase, "Creates and appends hourly time series documents in", "Key-value sub-document operations")
+Rel(telemetry, redis, "Publishes validated points through", "SignalR Redis backplane")
+@enduml

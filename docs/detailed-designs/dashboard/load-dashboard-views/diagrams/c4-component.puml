@@ -1,0 +1,29 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Load dashboard views
+
+Person(user, "Dashboard user", "Navigates among telemetry views")
+Container_Boundary(frontend_boundary, "Dashboard application") {
+  Component(routes, "DashboardRoutes", "React Router route table", "Defines route-level dynamic imports")
+  Component(loader, "ViewLoader", "React Suspense boundary", "Presents fallback and resolved view")
+  Component(view_entry, "telemetry-dashboard-view/index.ts", "Publishable view library entry point", "Exports the lazy telemetry dashboard view")
+  Component(view, "TelemetryDashboardView", "React component in view library", "Composes telemetry data and presentation")
+  Component(core_entry, "dashboard-core/index.ts", "Presentation library entry point", "Exports supported presentation components")
+  Component(view_exports, "View library package export", "package.json boundary", "Exposes only telemetry-dashboard-view/index.ts")
+  Component(core_exports, "Core library package export", "package.json boundary", "Exposes only dashboard-core/index.ts")
+  Component(lint, "Import-boundary rule", "Workspace lint rule", "Rejects deep library imports")
+  Component(bundler, "Production bundler", "Frontend build configuration", "Emits each dynamic view as a separate chunk")
+}
+
+Rel(user, routes, "Selects a route through", "Browser navigation")
+Rel(routes, loader, "Renders route within")
+Rel(loader, view_entry, "Loads the publishable library on demand", "Dynamic import of package entry")
+Rel(view_entry, view, "Exports")
+Rel(view, core_entry, "Imports dashboard components through")
+Rel(view_entry, view_exports, "Is declared by")
+Rel(core_entry, core_exports, "Is declared by")
+Rel(lint, view, "Checks imports in")
+Rel(bundler, routes, "Discovers dynamic boundaries in")
+Rel(bundler, view_entry, "Emits the view library as a separate chunk")
+@enduml

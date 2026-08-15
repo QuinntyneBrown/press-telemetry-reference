@@ -1,0 +1,31 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Display live telemetry
+
+Container_Ext(api, "Telemetry API", "ASP.NET Core and SignalR", "Supplies stored and live telemetry")
+Container_Boundary(frontend_boundary, "Dashboard application") {
+  Component(view, "TelemetryDashboardView", "React view", "Composes query, connection, and presentation state")
+  Component(snapshot, "useTelemetrySnapshot", "TanStack Query hook", "Hydrates latest-series data")
+  Component(range, "useTelemetryRange", "TanStack Query hook", "Hydrates visible chart data")
+  Component(cache, "TanStack Query cache", "Browser state", "Holds snapshot and range entries")
+  Component(live_hook, "useLiveTelemetry", "React lifecycle hook", "Coordinates connection, indefinite retry, and reconciliation")
+  Component(hub, "TelemetryHubClient", "@microsoft/signalr adapter", "Receives broadcasts and retries connection indefinitely")
+  Component(batcher, "TelemetryBatcher", "In-memory buffer", "Flushes points at approximately 1 Hz")
+  Component(patcher, "patchTelemetryCaches", "Pure cache function", "Patches snapshots and ordered range data")
+}
+
+Rel(view, snapshot, "Reads snapshot state through")
+Rel(view, range, "Reads visible range state through")
+Rel(snapshot, api, "Loads latest telemetry from", "JSON/HTTPS")
+Rel(range, api, "Loads range telemetry from", "JSON/HTTPS")
+Rel(snapshot, cache, "Stores and reads")
+Rel(range, cache, "Stores and reads")
+Rel(view, live_hook, "Owns")
+Rel(live_hook, hub, "Controls")
+Rel(api, hub, "Broadcasts every live point to", "SignalR/WebSocket")
+Rel(hub, batcher, "Buffers inbound points in")
+Rel(batcher, patcher, "Flushes a batch through")
+Rel(patcher, cache, "Updates snapshot and range entries in")
+Rel(cache, view, "Notifies with current state")
+@enduml

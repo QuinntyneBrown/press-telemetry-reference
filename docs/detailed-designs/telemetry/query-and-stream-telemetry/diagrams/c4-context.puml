@@ -1,0 +1,14 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Query and stream telemetry
+
+Person(user, "Dashboard user", "Views historical and live press telemetry")
+System(dashboard, "Press telemetry reference", "Serves stored and live telemetry to dashboard users")
+System_Ext(couchbase, "Couchbase", "Stores hourly time series documents")
+System_Ext(redis, "Redis", "Carries worker-published live points")
+
+Rel(user, dashboard, "Queries and monitors telemetry using", "HTTPS and SignalR")
+Rel(dashboard, couchbase, "Reads ranges and snapshots from", "Couchbase _timeseries()")
+Rel(redis, dashboard, "Delivers points for broadcast to every connected client", "SignalR Redis backplane")
+@enduml

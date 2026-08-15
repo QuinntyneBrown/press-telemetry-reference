@@ -1,0 +1,53 @@
+@startuml
+title UML sequence behaviour — Reconnect and reconcile telemetry
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Dashboard user" as user
+box "Frontend — Dashboard application" #E0F2FE
+  participant "TelemetryDashboardView" as view
+  participant "useLiveTelemetry" as live
+  participant "TelemetryHubClient" as hub
+  participant "TanStack Query cache" as cache
+end box
+box "Backend — Telemetry API application" #D1FADF
+  participant "TelemetryHub" as api_hub
+  participant "Telemetry REST API" as rest
+end box
+
+api_hub --> hub : Connection closes
+hub -> live : State changed to Reconnecting [L2-012]
+live -> view : Expose reconnecting state
+view --> user : Show reconnecting indicator
+loop Indefinite custom reconnect policy
+  hub -> api_hub : Reconnect
+  alt API remains unavailable
+    api_hub --> hub : Connection failure
+    hub -> live : Keep retrying beyond four attempts [L2-012]
+  else API is available
+    api_hub --> hub : Connected
+  end
+end
+hub -> live : State changed to Connected
+live -> cache : Invalidate telemetry queries [L2-012]
+cache -> rest : Refetch snapshot and visible ranges
+rest --> cache : Current stored telemetry
+cache -> view : Notify reconciled state
+view --> user : Show connected state and backfilled values
+opt View unmounts or tab closes
+  view -> live : Dispose
+  live -> hub : Stop connection and reconnect loop [L2-012]
+  hub --> live : Stopped
+end
+@enduml

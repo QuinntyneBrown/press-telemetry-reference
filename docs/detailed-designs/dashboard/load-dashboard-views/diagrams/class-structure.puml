@@ -1,0 +1,67 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Load dashboard views
+
+class DashboardRoutes <<component>> {
+  +routes: RouteObject[]
+  +render(): ReactNode
+}
+
+class ViewLoader <<component>> {
+  +fallback: ReactNode
+  +render(view: LazyExoticComponent): ReactNode
+}
+
+class TelemetryDashboardView <<lazy component>> {
+  +render(): ReactNode
+}
+
+class TelemetryDashboardViewEntry <<module>> {
+  +TelemetryDashboardView
+}
+
+class DashboardCorePublicApi <<module>> {
+  +DashboardGrid
+  +LatestValueTile
+  +TimeSeriesChart
+  +ConnectionStatusIndicator
+  +theme
+}
+
+class PackageExports <<configuration>> {
+  +string rootEntry
+}
+
+class ImportBoundaryRule <<lint rule>> {
+  +check(importPath: string): LintResult
+}
+
+class ProductionBundler <<configuration>> {
+  +build(): ViewChunk[]
+}
+
+class ViewChunk <<artifact>> {
+  +string route
+  +string fileName
+}
+
+DashboardRoutes *-- ViewLoader : wraps routes with
+DashboardRoutes ..> TelemetryDashboardViewEntry : imports package lazily
+TelemetryDashboardViewEntry --> TelemetryDashboardView : exports
+TelemetryDashboardView ..> DashboardCorePublicApi : imports
+TelemetryDashboardViewEntry --> PackageExports : exposed by view-library map
+DashboardCorePublicApi --> PackageExports : exposed by core-library map
+ImportBoundaryRule ..> TelemetryDashboardView : checks imports in
+ProductionBundler ..> DashboardRoutes : finds dynamic imports in
+ProductionBundler *-- "*" ViewChunk : emits
+ViewChunk ..> TelemetryDashboardViewEntry : contains
+@enduml

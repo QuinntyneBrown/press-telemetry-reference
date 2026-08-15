@@ -1,0 +1,48 @@
+@startuml
+title UML sequence behaviour — Load a dashboard view on demand
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Dashboard user" as user
+box "Frontend — Dashboard application shell" #E0F2FE
+  participant "DashboardRoutes" as routes
+  participant "ViewLoader" as loader
+  participant "Browser module loader" as browser
+end box
+box "Frontend — Dashboard view chunk" #E0F2FE
+  participant "telemetry-dashboard-view public entry" as view_entry
+  participant "TelemetryDashboardView" as view
+  participant "dashboard-core public entry" as core
+end box
+
+user -> routes : Navigate to telemetry view
+routes -> loader : Render lazy route [L2-014]
+loader -> browser : Resolve dynamic import
+alt View chunk is not loaded
+  loader --> user : Present loading fallback
+  browser -> view_entry : Request publishable view library chunk [L2-014]
+  view_entry --> browser : Loaded public module
+else View chunk is already loaded
+  browser -> browser : Resolve cached module
+end
+browser --> loader : View library public exports
+loader -> view_entry : Read TelemetryDashboardView export
+view_entry --> loader : TelemetryDashboardView component
+loader -> view : Render
+view -> core : Import supported components through package entry [L2-014]
+core --> view : Public component exports
+view --> loader : Rendered telemetry view
+loader --> routes : Resolved route element
+routes --> user : Present telemetry view
+@enduml

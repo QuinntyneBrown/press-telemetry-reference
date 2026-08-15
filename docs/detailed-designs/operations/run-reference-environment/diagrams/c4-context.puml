@@ -1,0 +1,17 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Run the reference environment
+
+Person(developer, "Developer", "Starts the local reference and verifies telemetry delivery")
+System(solution, "Press telemetry reference", "Ingests, stores, serves, and displays press telemetry")
+System_Ext(mqtt, "MQTT broker", "Local external message broker")
+System_Ext(couchbase, "Couchbase 7.6+", "Local external time series storage")
+System_Ext(redis, "Redis", "Local external SignalR backplane")
+
+Rel(developer, solution, "Starts, observes, and queries", "Documented local commands and HTTPS")
+Rel(developer, mqtt, "Publishes a sample telemetry point to", "MQTT command")
+Rel(mqtt, solution, "Delivers sample telemetry to", "MQTT")
+Rel(solution, couchbase, "Stores and reads telemetry in", "Couchbase")
+Rel(solution, redis, "Distributes live telemetry through", "SignalR Redis backplane")
+@enduml

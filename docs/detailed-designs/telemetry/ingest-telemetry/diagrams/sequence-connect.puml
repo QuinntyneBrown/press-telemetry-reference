@@ -1,0 +1,50 @@
+@startuml
+title UML sequence behaviour — Connect and recover MQTT
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Worker host" as host
+box "Backend — Telemetry ingestion worker" #D1FADF
+  participant "TelemetryIngestionWorker" as worker
+  participant "MqttTelemetrySource" as source
+  participant "Structured logger" as logger
+end box
+box "Backend — External infrastructure" #FFF4E5
+  participant "MQTT broker" as mqtt
+end box
+
+host -> worker : Start process
+worker -> source : Connect with configured broker and topic filter at QoS 0 [L2-001]
+loop Until connected or shutdown
+  source -> mqtt : Open MQTT connection
+  alt Broker is unavailable
+    mqtt --> source : Connection failure
+    source -> logger : Log retry with delay from 1 s to 30 s cap [L2-001]
+  else Broker is reachable
+    mqtt --> source : Connected
+    source -> mqtt : Subscribe to configured topic filter at QoS 0 [L2-001]
+    mqtt --> source : Subscription acknowledged
+    source -> logger : Log broker and topic filter [L2-001]
+  end
+end
+source --> worker : Ready while process remains alive
+opt Established connection drops
+  mqtt --> source : Disconnect notification
+  source -> logger : Log disconnected state [L2-001]
+  source -> mqtt : Reconnect with 1 s to 30 s capped backoff
+  mqtt --> source : Connected
+  source -> mqtt : Re-subscribe to topic filter at QoS 0 [L2-001]
+  mqtt --> source : Subscription acknowledged
+end
+@enduml

@@ -1,0 +1,40 @@
+@startuml
+title UML sequence behaviour — Load the dashboard snapshot
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Dashboard user" as user
+box "Frontend — Dashboard application" #E0F2FE
+  participant "useTelemetrySnapshot" as query
+end box
+box "Backend — Telemetry API application" #D1FADF
+  participant "TelemetryController" as controller
+end box
+box "Backend — Telemetry API infrastructure" #FFF4E5
+  participant "CouchbaseTelemetryReader" as reader
+  database "Couchbase" as couchbase
+end box
+
+user -> query : Load dashboard
+query -> controller : GET /api/telemetry/latest
+controller -> reader : ReadLatestAsync() [L2-006]
+reader -> couchbase : Aggregate newest point from _timeseries() documents [L2-006]
+couchbase --> reader : Latest points or empty result
+reader --> controller : TelemetryPointDto array
+controller --> query : 200 JSON array [L2-006]
+query --> user : Render newest value for each series
+note over reader,couchbase
+  No latest-value document or series registry is read or maintained.
+end note
+@enduml

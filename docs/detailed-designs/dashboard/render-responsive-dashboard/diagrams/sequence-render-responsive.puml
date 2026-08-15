@@ -1,0 +1,59 @@
+@startuml
+title UML sequence behaviour — Render and resize the dashboard
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Dashboard user" as user
+box "Frontend — Dashboard application" #E0F2FE
+  participant "TelemetryDashboardView" as view
+end box
+box "Frontend — dashboard-core library" #E0F2FE
+  participant "DashboardGrid" as grid
+  participant "LatestValueTile" as tile
+  participant "TimeSeriesChart" as chart
+  participant "ConnectionStatusIndicator" as status
+  participant "useContainerSize" as size
+  participant "theme.css" as theme
+end box
+
+user -> view : Open telemetry dashboard
+view -> grid : Render cached telemetry props [L2-013]
+grid -> theme : Read layout and color tokens [L2-015]
+theme --> grid : Dark theme tokens
+grid -> tile : Render latest value props
+tile -> theme : Read surface, text, data, and live tokens
+theme --> tile : Token values
+tile --> grid : Latest value tile
+grid -> chart : Render ordered point props
+chart -> size : Observe chart container
+size --> chart : Current width and height
+chart -> theme : Read chart color tokens
+theme --> chart : Token values
+chart --> grid : Sized time series chart
+grid -> status : Render connection state props
+status --> grid : Status indicator
+grid --> view : Responsive dashboard tree
+view --> user : Present dark dashboard
+alt Viewport is below 576 px
+  user -> grid : Resize viewport
+  grid -> grid : Auto-fit one column without horizontal scrolling [L2-016]
+else Viewport reaches 768 px or 1200 px
+  user -> grid : Resize viewport
+  grid -> grid : Auto-fit at least two or three columns [L2-016]
+end
+user -> size : Resize chart container
+size -> chart : Report new dimensions [L2-016]
+chart -> chart : Redraw to fit container
+chart --> user : Present resized chart
+@enduml

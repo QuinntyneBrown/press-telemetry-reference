@@ -1,0 +1,44 @@
+@startuml
+title UML sequence behaviour — Receive a live telemetry broadcast
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Dashboard user" as user
+box "Frontend — Dashboard application" #E0F2FE
+  participant "TelemetryHubClient" as client
+  participant "Other connected clients" as others
+end box
+box "Backend — Telemetry API application" #D1FADF
+  participant "TelemetryHub" as hub
+end box
+box "Backend — Telemetry API infrastructure" #FFF4E5
+  participant "Redis" as redis
+  participant "RedisLiveStream" as live
+end box
+
+user -> client : Open live dashboard
+client -> hub : Connect to /hubs/telemetry [L2-007]
+hub --> client : Connected without subscription operation
+redis -> live : Worker-published telemetry point
+live -> hub : Broadcast telemetry(point) [L2-007]
+par Deliver to current dashboard
+  hub --> client : telemetry(TelemetryPointDto)
+else Deliver to every other connected dashboard
+  hub --> others : telemetry(TelemetryPointDto)
+end
+client --> user : Present live value
+note over live,hub
+  The broadcast path performs no Couchbase read.
+end note
+@enduml

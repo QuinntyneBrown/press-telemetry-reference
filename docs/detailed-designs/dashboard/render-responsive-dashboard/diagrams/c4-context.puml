@@ -1,0 +1,10 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Render a responsive dashboard
+
+Person(user, "Dashboard user", "Monitors press telemetry across supported viewport sizes")
+System(dashboard, "Telemetry dashboard", "Presents current values, charts, and connection state in one dark responsive interface")
+
+Rel(user, dashboard, "Views telemetry using", "Web browser")
+@enduml

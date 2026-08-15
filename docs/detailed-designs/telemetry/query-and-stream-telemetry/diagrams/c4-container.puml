@@ -1,0 +1,19 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Query and stream telemetry
+
+Person(user, "Dashboard user", "Views historical and live press telemetry")
+System_Ext(couchbase, "Couchbase", "External time series document storage")
+System_Ext(redis, "Redis", "External SignalR backplane")
+System_Boundary(solution, "Press telemetry reference") {
+  Container(frontend, "Dashboard application", "React", "Requests and displays telemetry")
+  Container(api, "Telemetry API", "ASP.NET Core", "Exposes REST endpoints and the SignalR hub")
+}
+
+Rel(user, frontend, "Uses", "HTTPS")
+Rel(frontend, api, "Queries ranges and snapshots", "JSON/HTTPS")
+Rel(frontend, api, "Connects to the broadcast hub", "SignalR/WebSocket")
+Rel(api, couchbase, "Reads stored telemetry from", "Couchbase _timeseries()")
+Rel(redis, api, "Delivers worker-published points for all-client broadcast to", "SignalR Redis backplane")
+@enduml

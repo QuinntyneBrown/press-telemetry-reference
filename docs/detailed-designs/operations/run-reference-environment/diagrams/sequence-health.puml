@@ -1,0 +1,50 @@
+@startuml
+title UML sequence behaviour — Report API health
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Developer or health probe" as caller
+box "Frontend — Health client" #E0F2FE
+  participant "HTTP client" as client
+end box
+box "Backend — Telemetry API application" #D1FADF
+  participant "GET /health" as endpoint
+  participant "TelemetryHealthCheck" as health
+  participant "Structured logger" as logger
+end box
+box "Backend — External infrastructure" #FFF4E5
+  database "Couchbase" as couchbase
+  participant "Redis" as redis
+end box
+
+caller -> client : Request readiness
+client -> endpoint : GET /health [L2-021]
+endpoint -> health : CheckHealthAsync()
+par Check Couchbase
+  health -> couchbase : Readiness probe
+  couchbase --> health : Healthy or unhealthy
+else Check Redis
+  health -> redis : Readiness probe
+  redis --> health : Healthy or unhealthy
+end
+health -> logger : Record structured dependency status [L2-021]
+alt Both dependencies are healthy
+  health --> endpoint : Healthy report
+  endpoint --> client : 200 with per-dependency status
+else Either dependency is unhealthy
+  health --> endpoint : Unhealthy report naming dependency
+  endpoint --> client : 503 with per-dependency status
+end
+client --> caller : Present readiness result
+@enduml

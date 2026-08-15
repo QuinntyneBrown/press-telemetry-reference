@@ -1,0 +1,63 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Query and stream telemetry
+
+class TelemetryController {
+  +GetRange(deviceId: string, metric: string, from: string, to: string): Task<ActionResult>
+  +GetLatest(): Task<ActionResult>
+}
+
+class TelemetryQueryValidator {
+  +ValidateSeries(deviceId: string, metric: string): ValidationResult
+  +ValidateRange(from: string, to: string, maxWindow: TimeSpan): ValidationResult
+}
+
+class CouchbaseTelemetryReader {
+  +ReadRangeAsync(query: RangeQuery, token: CancellationToken): Task~IReadOnlyList~SeriesPointDto~~
+  +ReadLatestAsync(token: CancellationToken): Task~IReadOnlyList~TelemetryPointDto~~
+}
+
+class RangeQuery <<record>> {
+  +string DeviceId
+  +string Metric
+  +DateTimeOffset From
+  +DateTimeOffset To
+}
+
+class SeriesPointDto <<record>> {
+  +DateTimeOffset Timestamp
+  +double Value
+}
+
+class TelemetryPointDto <<record>> {
+  +string DeviceId
+  +string Metric
+  +double Value
+  +DateTimeOffset Timestamp
+}
+
+class TelemetryHub {
+  +BroadcastAsync(point: TelemetryPointDto, token: CancellationToken): Task
+}
+
+class RedisLiveStream {
+  +DeliverAsync(point: TelemetryPointDto, token: CancellationToken): Task
+}
+
+TelemetryController ..> TelemetryQueryValidator : validates with
+TelemetryController ..> CouchbaseTelemetryReader : queries through
+CouchbaseTelemetryReader ..> RangeQuery : accepts
+CouchbaseTelemetryReader ..> SeriesPointDto : returns
+CouchbaseTelemetryReader ..> TelemetryPointDto : returns
+RedisLiveStream ..> TelemetryHub : sends through
+RedisLiveStream ..> TelemetryPointDto : delivers
+@enduml

@@ -1,0 +1,30 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Render a responsive dashboard
+
+Container_Ext(app, "Dashboard application", "React", "Supplies cached telemetry and connection props")
+Container_Boundary(core_boundary, "dashboard-core library") {
+  Component(grid, "DashboardGrid", "React component", "Applies fluid auto-fit column layout")
+  Component(tile, "LatestValueTile", "React component", "Presents one current series value")
+  Component(chart, "TimeSeriesChart", "React chart component", "Presents ordered telemetry points")
+  Component(status, "ConnectionStatusIndicator", "React component", "Presents live connection state")
+  Component(size, "useContainerSize", "ResizeObserver hook", "Reports chart container dimensions")
+  Component(theme, "theme.css", "CSS design tokens", "Defines dark neutral surfaces, text, data, status, and grid sizing")
+  Component(entry, "index.ts", "Package entry point", "Exports the supported presentation surface")
+}
+
+Rel(app, entry, "Imports components and theme through")
+Rel(entry, grid, "Exports")
+Rel(entry, tile, "Exports")
+Rel(entry, chart, "Exports")
+Rel(entry, status, "Exports")
+Rel(grid, tile, "Arranges")
+Rel(grid, chart, "Arranges")
+Rel(grid, status, "Arranges")
+Rel(chart, size, "Observes container through")
+Rel(grid, theme, "Uses layout tokens from")
+Rel(tile, theme, "Uses color tokens from")
+Rel(chart, theme, "Uses color tokens from")
+Rel(status, theme, "Uses color tokens from")
+@enduml

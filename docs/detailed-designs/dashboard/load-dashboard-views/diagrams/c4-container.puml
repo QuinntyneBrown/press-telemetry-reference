@@ -1,0 +1,12 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Load dashboard views
+
+Person(user, "Dashboard user", "Navigates among telemetry views")
+System_Boundary(solution, "Press telemetry reference") {
+  Container(frontend, "Dashboard application", "React frontend workspace", "Loads the application shell first and view chunks on demand")
+}
+
+Rel(user, frontend, "Loads the shell and navigates to views", "HTTPS")
+@enduml

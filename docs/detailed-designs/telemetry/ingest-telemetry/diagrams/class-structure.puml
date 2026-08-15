@@ -1,0 +1,74 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Ingest telemetry
+
+class TelemetryPoint <<record>> {
+  +string DeviceId
+  +string Metric
+  +double Value
+  +DateTimeOffset Timestamp
+}
+
+class IngestionOptions {
+  +Uri BrokerAddress
+  +string TopicFilter
+  +Validate(): void
+}
+
+class TelemetryIngestionWorker {
+  +ExecuteAsync(token: CancellationToken): Task
+  -ProcessAsync(payload: ReadOnlyMemory<byte>, token: CancellationToken): Task
+}
+
+class MqttTelemetrySource {
+  +ConnectAsync(token: CancellationToken): Task
+  +SubscribeAsync(topicFilter: string, qos: 0, token: CancellationToken): Task
+  +Messages(token: CancellationToken): IAsyncEnumerable<ReadOnlyMemory<byte>>
+}
+
+class TelemetryPointParser {
+  +Parse(payload: ReadOnlySpan<byte>): ParseResult<TelemetryPoint>
+}
+
+class CouchbaseTimeSeriesWriter {
+  +AppendAsync(point: TelemetryPoint, token: CancellationToken): Task
+  -BuildKey(point: TelemetryPoint): TimeSeriesDocumentKey
+  -UpsertBucketAsync(key: TimeSeriesDocumentKey, point: TelemetryPoint): Task
+}
+
+class TimeSeriesDocumentKey <<record>> {
+  +string DeviceId
+  +string Metric
+  +DateTimeOffset HourStart
+}
+
+class TimeSeriesDocument <<document>> {
+  +DateTimeOffset ts_start
+  +DateTimeOffset ts_end
+  +double[] ts_data
+}
+
+class RedisTelemetryPublisher {
+  +PublishAsync(point: TelemetryPoint, token: CancellationToken): Task
+}
+
+TelemetryIngestionWorker --> IngestionOptions : reads
+TelemetryIngestionWorker ..> MqttTelemetrySource : controls
+TelemetryIngestionWorker ..> TelemetryPointParser : validates with
+TelemetryIngestionWorker ..> CouchbaseTimeSeriesWriter : persists through
+TelemetryIngestionWorker ..> RedisTelemetryPublisher : publishes through
+TelemetryPointParser ..> TelemetryPoint : creates
+CouchbaseTimeSeriesWriter ..> TelemetryPoint : appends
+CouchbaseTimeSeriesWriter ..> TimeSeriesDocumentKey : derives
+CouchbaseTimeSeriesWriter ..> TimeSeriesDocument : creates / appends
+RedisTelemetryPublisher ..> TelemetryPoint : publishes
+@enduml

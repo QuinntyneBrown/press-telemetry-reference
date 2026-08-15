@@ -1,0 +1,24 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Ingest telemetry
+
+System_Ext(mqtt, "MQTT broker", "External message broker")
+System_Ext(couchbase, "Couchbase", "Hourly time series document storage")
+System_Ext(redis, "Redis", "SignalR backplane")
+Container_Boundary(worker_boundary, "Telemetry ingestion worker") {
+  Component(worker, "TelemetryIngestionWorker", ".NET hosted service", "Coordinates connection lifecycle and message processing")
+  Component(source, "MqttTelemetrySource", "MQTT adapter", "Subscribes at QoS 0 and reconnects with standard backoff")
+  Component(parser, "TelemetryPointParser", "JSON validator", "Creates validated telemetry points")
+  Component(writer, "CouchbaseTimeSeriesWriter", "Couchbase adapter", "Creates and appends hourly ts_start / ts_end / ts_data documents")
+  Component(live, "RedisTelemetryPublisher", "SignalR backplane adapter", "Publishes points without an HTTP or SignalR listener")
+}
+
+Rel(worker, source, "Starts and receives messages from")
+Rel(mqtt, source, "Delivers subscribed messages to", "MQTT QoS 0")
+Rel(worker, parser, "Parses and validates with")
+Rel(worker, writer, "Appends valid points through")
+Rel(writer, couchbase, "Creates or appends hourly bucket documents", "Key-value sub-document operations")
+Rel(worker, live, "Publishes valid points through")
+Rel(live, redis, "Publishes live stream", "SignalR Redis backplane")
+@enduml

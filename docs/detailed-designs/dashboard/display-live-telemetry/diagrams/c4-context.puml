@@ -1,0 +1,13 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Display live telemetry
+
+Person(user, "Dashboard user", "Monitors current and historical press telemetry")
+System(dashboard, "Telemetry dashboard", "Hydrates from REST and applies batched live updates")
+System_Ext(api, "Telemetry API", "Provides snapshots, ranges, and broadcast SignalR messages")
+
+Rel(user, dashboard, "Monitors telemetry using", "Web browser")
+Rel(dashboard, api, "Loads stored telemetry from", "JSON/HTTPS")
+Rel(api, dashboard, "Broadcasts live telemetry to", "SignalR/WebSocket")
+@enduml

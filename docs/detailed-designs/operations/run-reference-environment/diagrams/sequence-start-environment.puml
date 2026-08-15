@@ -1,0 +1,69 @@
+@startuml
+title UML sequence behaviour — Start and verify the reference environment
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Developer" as developer
+box "Frontend — Developer workstation" #E0F2FE
+  participant "Command shell" as shell
+  participant "Frontend workspace" as frontend
+  participant "Dashboard browser" as browser
+end box
+box "Backend — Press telemetry applications" #D1FADF
+  participant "Telemetry ingestion worker" as worker
+  participant "Telemetry API" as api
+  participant "Options validation" as validation
+  participant "Structured logger" as logger
+end box
+box "Backend — Docker Compose infrastructure" #FFF4E5
+  participant "Docker Compose" as compose
+  participant "MQTT broker" as mqtt
+  database "Couchbase 7.6+" as couchbase
+  participant "Redis" as redis
+end box
+
+developer -> shell : Follow clean-clone runbook [L2-020]
+shell -> compose : Start compose.yaml
+par Start MQTT broker
+  compose -> mqtt : Create and await healthy
+  mqtt --> compose : Healthy
+else Initialize Couchbase
+  compose -> couchbase : Create pinned 7.6+ service and time series storage [L2-020]
+  couchbase --> compose : Healthy and initialized
+else Start Redis
+  compose -> redis : Create and await healthy
+  redis --> compose : Healthy
+end
+compose --> shell : Exactly three infrastructure services ready [L2-017, L2-020]
+shell -> worker : Start first backend deployable
+worker -> validation : Validate required configuration [L2-018]
+shell -> api : Start second backend deployable
+api -> validation : Validate required configuration [L2-018]
+alt A required setting is absent
+  validation -> logger : Name missing setting
+  validation --> shell : Fail affected process startup
+else Configuration is valid
+  validation --> worker : Start worker
+  validation --> api : Start API
+end
+shell -> frontend : Start single frontend workspace [L2-017]
+frontend --> browser : Serve dashboard
+developer -> mqtt : Publish documented sample telemetry [L2-020]
+mqtt -> worker : Deliver sample point
+worker -> couchbase : Append sample point
+worker -> redis : Publish sample point
+redis -> api : Deliver live point
+api -> browser : Push SignalR telemetry
+browser --> developer : Display sample value within 3 s
+@enduml

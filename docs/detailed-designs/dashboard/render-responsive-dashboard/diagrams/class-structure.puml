@@ -1,0 +1,77 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Render a responsive dashboard
+
+class LatestValueTileProps <<type>> {
+  +string label
+  +number value
+  +string unit
+  +string timestamp
+  +boolean isLive
+}
+
+class TimeSeriesChartProps <<type>> {
+  +string label
+  +ReadonlyArray~SeriesPoint~ points
+}
+
+class ConnectionStatusProps <<type>> {
+  +ConnectionState state
+}
+
+class DashboardGridProps <<type>> {
+  +ReactNode children
+}
+
+class LatestValueTile <<component>> {
+  +render(props: LatestValueTileProps): ReactNode
+}
+
+class TimeSeriesChart <<component>> {
+  +render(props: TimeSeriesChartProps): ReactNode
+  -redraw(width: number, height: number): void
+}
+
+class ConnectionStatusIndicator <<component>> {
+  +render(props: ConnectionStatusProps): ReactNode
+}
+
+class DashboardGrid <<component>> {
+  +render(props: DashboardGridProps): ReactNode
+}
+
+class UseContainerSize <<hook>> {
+  +useContainerSize(element: HTMLElement): Size
+}
+
+class ThemeTokens <<css>> {
+  +colorSurface: string
+  +colorText: string
+  +colorData: string
+  +colorStatusLive: string
+  +gridMinimumTrack: 22rem
+  +gridGap: 1rem
+}
+
+LatestValueTile ..> LatestValueTileProps : accepts
+TimeSeriesChart ..> TimeSeriesChartProps : accepts
+ConnectionStatusIndicator ..> ConnectionStatusProps : accepts
+DashboardGrid ..> DashboardGridProps : accepts
+TimeSeriesChart ..> UseContainerSize : observes with
+LatestValueTile ..> ThemeTokens : styles with
+TimeSeriesChart ..> ThemeTokens : styles with
+ConnectionStatusIndicator ..> ThemeTokens : styles with
+DashboardGrid ..> ThemeTokens : builds auto-fit grid with
+DashboardGrid o-- "*" LatestValueTile : arranges
+DashboardGrid o-- "*" TimeSeriesChart : arranges
+DashboardGrid o-- "1" ConnectionStatusIndicator : arranges
+@enduml

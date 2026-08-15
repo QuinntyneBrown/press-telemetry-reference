@@ -1,0 +1,18 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Ingest telemetry
+
+System_Ext(publisher, "External telemetry publisher", "Publishes press measurements")
+System_Ext(mqtt, "MQTT broker", "External message broker")
+System_Ext(couchbase, "Couchbase", "External hourly time series document storage")
+System_Ext(redis, "Redis", "External SignalR backplane")
+System_Boundary(solution, "Press telemetry reference") {
+  Container(worker, "Telemetry ingestion worker", ".NET worker service", "Consumes, validates, persists, and publishes telemetry")
+}
+
+Rel(publisher, mqtt, "Publishes telemetry to", "MQTT")
+Rel(mqtt, worker, "Delivers telemetry/# messages to", "MQTT QoS 0")
+Rel(worker, couchbase, "Creates or appends hourly bucket documents in", "Key-value sub-document operations")
+Rel(worker, redis, "Publishes each valid point through", "SignalR Redis backplane")
+@enduml

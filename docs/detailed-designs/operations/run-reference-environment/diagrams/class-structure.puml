@@ -1,0 +1,70 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Run the reference environment
+
+class WorkerOptions {
+  +Uri MqttBroker
+  +string MqttTopicFilter
+  +string CouchbaseConnectionString
+  +string RedisConnectionString
+}
+
+class ApiOptions {
+  +string CouchbaseConnectionString
+  +string RedisConnectionString
+  +string[] CorsOrigins
+}
+
+interface IValidateOptions~TOptions~ {
+  +Validate(name: string, options: TOptions): ValidateOptionsResult
+}
+
+class WorkerOptionsValidator {
+  +Validate(name: string, options: WorkerOptions): ValidateOptionsResult
+}
+
+class ApiOptionsValidator {
+  +Validate(name: string, options: ApiOptions): ValidateOptionsResult
+}
+
+class StructuredLoggingOptions {
+  +LogLevel MinimumLevel
+}
+
+class TelemetryHealthCheck {
+  +CheckHealthAsync(context: HealthCheckContext, token: CancellationToken): Task~HealthCheckResult~
+}
+
+class CouchbaseReadinessCheck {
+  +CheckAsync(token: CancellationToken): Task~DependencyStatus~
+}
+
+class RedisReadinessCheck {
+  +CheckAsync(token: CancellationToken): Task~DependencyStatus~
+}
+
+class HealthReport <<record>> {
+  +DependencyStatus Couchbase
+  +DependencyStatus Redis
+  +HealthStatus Overall
+}
+
+IValidateOptions <|.. WorkerOptionsValidator
+IValidateOptions <|.. ApiOptionsValidator
+WorkerOptionsValidator ..> WorkerOptions : validates
+ApiOptionsValidator ..> ApiOptions : validates
+TelemetryHealthCheck *-- CouchbaseReadinessCheck : aggregates
+TelemetryHealthCheck *-- RedisReadinessCheck : aggregates
+TelemetryHealthCheck ..> HealthReport : creates
+WorkerOptions --> StructuredLoggingOptions : accompanies
+ApiOptions --> StructuredLoggingOptions : accompanies
+@enduml

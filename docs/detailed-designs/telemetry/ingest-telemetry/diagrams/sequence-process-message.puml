@@ -1,0 +1,72 @@
+@startuml
+title UML sequence behaviour — Process an MQTT telemetry message
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+box "External — Telemetry source" #F2F4F7
+  participant "External publisher" as publisher
+  participant "MQTT broker" as mqtt
+end box
+box "Backend — Telemetry ingestion worker" #D1FADF
+  participant "TelemetryIngestionWorker" as worker
+  participant "TelemetryPointParser" as parser
+  participant "CouchbaseTimeSeriesWriter" as writer
+  participant "RedisTelemetryPublisher" as live
+  participant "Structured logger" as logger
+end box
+box "Backend — External infrastructure" #FFF4E5
+  database "Couchbase" as couchbase
+  participant "Redis" as redis
+end box
+
+publisher -> mqtt : Publish JSON payload
+mqtt -> worker : Deliver subscribed message
+worker -> parser : Parse and validate telemetry shape [L2-002]
+alt Payload is invalid
+  parser --> worker : Validation failure
+  worker -> logger : Log warning with failure reason [L2-002]
+else Payload is valid
+  parser --> worker : Validated TelemetryPoint
+  par Persist point
+    loop Up to 3 attempts with standard backoff
+      worker -> writer : Append point to hourly bucket [L2-003, L2-004]
+      writer -> writer : Derive key from deviceId, metric, and UTC hour
+      writer -> couchbase : Create or append ts_start / ts_end / ts_data with sub-document operation
+      alt Write succeeds
+        couchbase --> writer : Write result
+        writer --> worker : Stored
+      else Write fails
+        couchbase --> writer : Failure
+        writer --> worker : Retryable failure
+      end
+    end
+    opt Retry limit is exhausted
+      worker -> logger : Log point identity and persistence error [L2-004]
+    end
+  else Publish live
+    worker -> live : Publish validated point [L2-008]
+    live -> redis : Publish through SignalR backplane
+    alt Publish succeeds
+      redis --> live : Accepted
+      live --> worker : Published
+    else Redis is unavailable
+      redis --> live : Failure
+      live --> worker : Fan-out failure
+      worker -> logger : Log live fan-out failure [L2-008]
+      worker -> worker : Do not queue point for later live replay [L2-008]
+    end
+  end
+end
+worker --> mqtt : Message processing complete
+@enduml

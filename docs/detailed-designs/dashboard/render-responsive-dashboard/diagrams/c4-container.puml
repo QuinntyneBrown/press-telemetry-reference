@@ -1,0 +1,12 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Render a responsive dashboard
+
+Person(user, "Dashboard user", "Monitors press telemetry across supported viewport sizes")
+System_Boundary(solution, "Press telemetry reference") {
+  Container(frontend, "Dashboard application", "React frontend workspace", "Supplies telemetry props and renders dashboard-core components")
+}
+
+Rel(user, frontend, "Views dark responsive telemetry UI using", "Web browser")
+@enduml

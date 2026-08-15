@@ -1,0 +1,73 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Display live telemetry
+
+enum ConnectionState {
+  Connecting
+  Connected
+  Reconnecting
+  Disconnected
+}
+
+class TelemetryPoint <<type>> {
+  +string deviceId
+  +string metric
+  +number value
+  +string timestamp
+}
+
+class TelemetryHubClient {
+  +connectionState: ConnectionState
+  +connect(): Promise~void~
+  +stop(): Promise~void~
+  -nextRetryDelay(previousRetryCount: number): number
+}
+
+class TelemetryBatcher {
+  -intervalMs: number
+  -pending: TelemetryPoint[]
+  +enqueue(point: TelemetryPoint): void
+  +flush(): TelemetryPoint[]
+  +dispose(): void
+}
+
+class TelemetryCachePatcher <<function>> {
+  +patchTelemetryCaches(cache: QueryClient, points: TelemetryPoint[]): void
+}
+
+class UseLiveTelemetry <<hook>> {
+  +useLiveTelemetry(): ConnectionState
+}
+
+class UseTelemetrySnapshot <<hook>> {
+  +useTelemetrySnapshot(): UseQueryResult~TelemetryPoint[]~
+}
+
+class UseTelemetryRange <<hook>> {
+  +useTelemetryRange(series: SeriesKey, range: TimeRange): UseQueryResult~SeriesPoint[]~
+}
+
+class TelemetryDashboardView <<component>> {
+  +render(): ReactNode
+}
+
+TelemetryHubClient --> ConnectionState : exposes
+TelemetryHubClient ..> TelemetryPoint : receives
+TelemetryBatcher o-- "*" TelemetryPoint : buffers
+UseLiveTelemetry ..> TelemetryHubClient : controls
+UseLiveTelemetry *-- TelemetryBatcher : owns
+UseLiveTelemetry ..> TelemetryCachePatcher : flushes through
+UseTelemetrySnapshot ..> TelemetryPoint : returns
+TelemetryDashboardView ..> UseTelemetrySnapshot : invokes
+TelemetryDashboardView ..> UseTelemetryRange : invokes
+TelemetryDashboardView ..> UseLiveTelemetry : invokes
+@enduml

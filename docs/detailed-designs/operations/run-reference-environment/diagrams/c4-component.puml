@@ -1,0 +1,40 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Run the reference environment
+
+Person(developer, "Developer", "Runs and verifies the local reference")
+System_Ext(mqtt, "MQTT broker", "Local external message broker")
+System_Ext(couchbase, "Couchbase 7.6+", "Local external storage")
+System_Ext(redis, "Redis", "Local external backplane")
+Container_Boundary(repo_boundary, "Repository run assets") {
+  Component(runbook, "Root README runbook", "Markdown", "Documents setup, startup, sample publish, and security boundary")
+  Component(compose, "compose.yaml", "Docker Compose", "Provisions exactly three infrastructure services")
+  Component(config, "Configuration defaults", ".NET and frontend configuration", "Provides local non-production values and environment overrides")
+  Component(secrets, "gitleaks verification", "Repository history scan", "Runs default rules against the complete history")
+}
+Container_Boundary(worker_boundary, "Telemetry ingestion worker") {
+  Component(worker_validation, "Worker options validation", ".NET options validation", "Fails startup when required settings are absent")
+  Component(worker_logging, "Worker structured logging", ".NET logging", "Records MQTT, Couchbase, and Redis state")
+}
+Container_Boundary(api_boundary, "Telemetry API") {
+  Component(api_validation, "API options validation", ".NET options validation", "Fails startup when required settings are absent")
+  Component(health, "TelemetryHealthCheck", "ASP.NET Core health checks", "Aggregates Couchbase and Redis readiness")
+  Component(api_logging, "API structured logging", ".NET logging", "Records Couchbase and Redis state")
+}
+
+Rel(developer, runbook, "Follows")
+Rel(runbook, compose, "Directs startup of")
+Rel(runbook, secrets, "Documents how to run")
+Rel(secrets, config, "Checks committed configuration and history containing")
+Rel(compose, mqtt, "Creates and checks")
+Rel(compose, couchbase, "Creates, initializes, and checks")
+Rel(compose, redis, "Creates and checks")
+Rel(config, worker_validation, "Supplies settings to")
+Rel(config, api_validation, "Supplies settings to")
+Rel(worker_validation, worker_logging, "Reports startup failures through")
+Rel(api_validation, api_logging, "Reports startup failures through")
+Rel(health, couchbase, "Checks readiness of")
+Rel(health, redis, "Checks readiness of")
+Rel(runbook, health, "Documents how to call")
+@enduml

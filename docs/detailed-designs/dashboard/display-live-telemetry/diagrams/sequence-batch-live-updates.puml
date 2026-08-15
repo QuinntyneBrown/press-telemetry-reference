@@ -1,0 +1,42 @@
+@startuml
+title UML sequence behaviour — Batch live telemetry updates
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+box "Backend — Telemetry API application" #D1FADF
+  participant "TelemetryHub" as api
+end box
+box "Frontend — Dashboard application" #E0F2FE
+  participant "TelemetryHubClient" as hub
+  participant "TelemetryBatcher" as batcher
+  participant "patchTelemetryCaches" as patcher
+  participant "TanStack Query cache" as cache
+  participant "TelemetryDashboardView" as view
+end box
+
+loop For each inbound telemetry message
+  api -> hub : telemetry(point)
+  hub -> batcher : enqueue(point) [L2-011]
+  batcher --> hub : Buffered
+end
+batcher -> batcher : Flush after approximately 1 s [L2-011]
+batcher -> patcher : Patch one batch
+patcher -> patcher : Keep newest snapshot point per series [L2-010, L2-011]
+patcher -> patcher : Sort each series batch and append all points newer than cached range [L2-010, L2-011]
+patcher -> patcher : Discard older or duplicate range points [L2-010]
+patcher -> cache : setQueryData for affected entries
+cache --> patcher : Cache updated without refetch
+cache -> view : Notify one committed cache update
+view --> cache : Render current cached state
+@enduml

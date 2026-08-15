@@ -1,0 +1,26 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Run the reference environment
+
+Person(developer, "Developer", "Runs and verifies the local reference")
+System_Ext(mqtt, "MQTT broker", "First external infrastructure service")
+System_Ext(couchbase, "Couchbase 7.6+", "Second external infrastructure service")
+System_Ext(redis, "Redis", "Third external infrastructure service")
+System_Boundary(solution, "Press telemetry reference") {
+  Container(worker, "Telemetry ingestion worker", ".NET worker service", "First backend deployable and sole telemetry writer")
+  Container(api, "Telemetry API", "ASP.NET Core", "Second backend deployable with REST, SignalR, and health")
+  Container(frontend, "Frontend workspace", "React", "Dashboard applications and publishable libraries")
+}
+
+Rel(developer, worker, "Starts and observes", "Documented command and structured logs")
+Rel(developer, api, "Starts and checks health", "Documented command and HTTPS")
+Rel(developer, frontend, "Starts and views", "Documented command and browser")
+Rel(developer, mqtt, "Publishes sample telemetry to", "MQTT")
+Rel(mqtt, worker, "Delivers telemetry to", "MQTT")
+Rel(worker, couchbase, "Appends telemetry to", "Couchbase time series")
+Rel(worker, redis, "Publishes live telemetry through", "SignalR Redis backplane")
+Rel(api, couchbase, "Reads telemetry and checks readiness", "Couchbase")
+Rel(api, redis, "Receives live telemetry and checks readiness", "SignalR Redis backplane")
+Rel(frontend, api, "Queries and receives live broadcasts", "HTTPS and SignalR")
+@enduml

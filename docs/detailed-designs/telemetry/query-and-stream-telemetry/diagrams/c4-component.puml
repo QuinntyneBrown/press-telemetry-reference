@@ -1,0 +1,27 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Query and stream telemetry
+
+Container_Ext(frontend, "Dashboard application", "React", "REST client and broadcast SignalR client")
+System_Ext(couchbase, "Couchbase", "Hourly time series document storage")
+System_Ext(redis, "Redis", "SignalR backplane")
+Container_Boundary(api_boundary, "Telemetry API") {
+  Component(cors, "CORS middleware", "ASP.NET Core middleware", "Enforces the configured browser-origin allowlist")
+  Component(controller, "TelemetryController", "ASP.NET Core controller", "Exposes range and latest endpoints")
+  Component(query_validator, "TelemetryQueryValidator", "Boundary validator", "Validates identifiers and time ranges")
+  Component(reader, "CouchbaseTelemetryReader", "Couchbase adapter", "Reads ranges and latest points")
+  Component(hub, "TelemetryHub", "SignalR hub", "Broadcasts each point to all connected clients")
+  Component(live, "RedisLiveStream", "SignalR backplane integration", "Routes worker-published points to each API instance")
+}
+
+Rel(frontend, cors, "Calls REST and hub endpoints", "HTTPS and SignalR")
+Rel(cors, controller, "Passes allowed REST requests to")
+Rel(cors, hub, "Passes allowed hub connections to")
+Rel(controller, query_validator, "Validates request with")
+Rel(controller, reader, "Reads telemetry through")
+Rel(reader, couchbase, "Runs read-only queries", "Couchbase _timeseries()")
+Rel(redis, live, "Delivers worker-published points to", "SignalR Redis backplane")
+Rel(live, hub, "Broadcasts every point through")
+Rel(hub, frontend, "Pushes every telemetry message to", "SignalR/WebSocket")
+@enduml

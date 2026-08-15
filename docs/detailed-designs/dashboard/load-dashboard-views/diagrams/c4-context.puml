@@ -1,0 +1,10 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Load dashboard views
+
+Person(user, "Dashboard user", "Navigates among telemetry views")
+System(dashboard, "Telemetry dashboard", "Loads each dashboard view on demand through supported library entry points")
+
+Rel(user, dashboard, "Navigates telemetry views using", "Web browser")
+@enduml

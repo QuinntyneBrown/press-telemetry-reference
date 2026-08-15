@@ -1,0 +1,51 @@
+@startuml
+title UML sequence behaviour — Query a historical telemetry range
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Dashboard user" as user
+box "Frontend — Dashboard application" #E0F2FE
+  participant "useTelemetryRange" as query
+end box
+box "Backend — Telemetry API application" #D1FADF
+  participant "CORS middleware" as cors
+  participant "TelemetryController" as controller
+  participant "TelemetryQueryValidator" as validator
+end box
+box "Backend — Telemetry API infrastructure" #FFF4E5
+  participant "CouchbaseTelemetryReader" as reader
+  database "Couchbase" as couchbase
+end box
+
+user -> query : Open a visible chart range
+query -> cors : GET /api/telemetry/{deviceId}/{metric}?from&to
+alt Origin is not allowed
+  cors --> query : Browser request denied [L2-019]
+else Origin is allowed
+  cors -> controller : Forward request
+  controller -> validator : Validate identifiers, timestamps, order, and 24-hour maximum [L2-005, L2-019]
+  alt Validation fails
+    validator --> controller : Invalid parameter and reason
+    controller --> query : 400 RFC 7807 ProblemDetails [L2-005, L2-019]
+  else Validation succeeds
+    validator --> controller : RangeQuery
+    controller -> reader : ReadRangeAsync(query)
+    reader -> couchbase : Run _timeseries() for [from, to) [L2-005]
+    couchbase --> reader : Points or empty result
+    reader --> controller : Points ordered by timestamp
+    controller --> query : 200 JSON array
+    query --> user : Render chart or empty state
+  end
+end
+@enduml
